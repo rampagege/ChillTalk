@@ -1865,6 +1865,40 @@
         }
       }
     },
+    "千问 / 阿里云百炼": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qwen / Alibaba Cloud Model Studio"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qwen / Alibaba Cloud Model Studio"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qwen / Alibaba Cloud Model Studio"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "千问 / 阿里云百炼"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "千問 / 阿里雲百煉"
+          }
+        }
+      }
+    },
     "单个修饰键（如右 ⌥）需要单独轻按才会触发：按住它再按其他键（⌥ 输入特殊字符、⌘C 等）不会开始录音。": {
       "localizations": {
         "en": {
@@ -2817,36 +2851,36 @@
         }
       }
     },
-    "告诉识别模型你平时聊什么领域，它会据此判断发音相近的词。支持阿里云百炼和 Soniox。": {
+    "告诉识别模型你平时聊什么领域，它会据此判断发音相近的词。支持千问 / 阿里云百炼和 Soniox。": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tell the recognition model what topics you usually talk about so it can pick between similar-sounding words. Supports Alibaba Cloud Model Studio and Soniox."
+            "value": "Tell the recognition model what topics you usually talk about so it can pick between similar-sounding words. Supports Qwen / Alibaba Cloud Model Studio and Soniox."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "普段話す分野を認識モデルに伝えると、発音の似た単語を判別する手がかりになります。Alibaba Cloud Model Studio と Soniox に対応しています。"
+            "value": "普段話す分野を認識モデルに伝えると、発音の似た単語を判別する手がかりになります。Qwen / Alibaba Cloud Model Studio と Soniox に対応しています。"
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "평소 어떤 분야에 대해 이야기하는지 인식 모델에 알려주면, 이를 바탕으로 발음이 비슷한 단어를 판단합니다. Alibaba Cloud Model Studio와 Soniox를 지원합니다."
+            "value": "평소 어떤 분야에 대해 이야기하는지 인식 모델에 알려주면, 이를 바탕으로 발음이 비슷한 단어를 판단합니다. Qwen / Alibaba Cloud Model Studio와 Soniox를 지원합니다."
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "告诉识别模型你平时聊什么领域，它会据此判断发音相近的词。支持阿里云百炼和 Soniox。"
+            "value": "告诉识别模型你平时聊什么领域，它会据此判断发音相近的词。支持千问 / 阿里云百炼和 Soniox。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "告訴辨識模型你平時聊哪些領域，它會據此判斷發音相近的詞。支援阿里雲百煉和 Soniox。"
+            "value": "告訴辨識模型你平時聊哪些領域，它會據此判斷發音相近的詞。支援千問 / 阿里雲百煉和 Soniox。"
           }
         }
       }
@@ -8763,74 +8797,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "錯誤"
-          }
-        }
-      }
-    },
-    "阿里云百炼 实时语音识别": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alibaba Cloud Model Studio real-time speech recognition"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alibaba Cloud Model Studio リアルタイム音声認識"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alibaba Cloud Model Studio 실시간 음성 인식"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "阿里云百炼 实时语音识别"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "阿里雲百煉 即時語音辨識"
-          }
-        }
-      }
-    },
-    "阿里云百炼（Qwen）": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alibaba Cloud Model Studio (Qwen)"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alibaba Cloud Model Studio（Qwen）"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alibaba Cloud Model Studio(Qwen)"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "阿里云百炼（Qwen）"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "阿里雲百煉（Qwen）"
           }
         }
       }

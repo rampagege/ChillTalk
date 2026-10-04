@@ -130,7 +130,7 @@ struct ASRPage: View {
 
     private var consoleURL: URL {
         switch model.asrProvider {
-        case .dashScope: return URL(string: "https://bailian.console.aliyun.com/")!
+        case .dashScope: return URL(string: "https://www.qianwenai.com/")!
         case .deepgram: return URL(string: "https://console.deepgram.com/")!
         case .openAIWhisper: return URL(string: "https://platform.openai.com/api-keys")!
         case .openRouter: return URL(string: "https://openrouter.ai/keys")!

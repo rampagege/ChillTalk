@@ -48,7 +48,7 @@ struct VocabularyPage: View {
                     .overlay(RoundedRectangle(cornerRadius: 7, style: .continuous).strokeBorder(Brand.hairline))
 
                     HStack {
-                        Text("告诉识别模型你平时聊什么领域，它会据此判断发音相近的词。支持阿里云百炼和 Soniox。")
+                        Text("告诉识别模型你平时聊什么领域，它会据此判断发音相近的词。支持千问 / 阿里云百炼和 Soniox。")
                             .font(.system(size: 11.5))
                             .foregroundStyle(.secondary)
                         Spacer()

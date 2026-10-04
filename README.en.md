@@ -35,11 +35,11 @@ Before the first build, set your own Team under Signing & Capabilities in Xcode 
 2. Menu bar icon → Settings… → Speech recognition: pick a provider, enter its API key, click **Test connection**
 3. In any text field, tap Right ⌥, speak, tap it again
 
-For Chinese, [Alibaba Cloud Model Studio](https://bailian.console.aliyun.com/) (pay-as-you-go) covers both recognition and polish with one key — about CN¥20/month at 30 minutes of dictation a day.
+For Chinese, a pay-as-you-go key from the [Qwen AI Platform](https://www.qianwenai.com/) (Alibaba Cloud Model Studio) covers both recognition and polish, with a 90-day free quota for new users — about CN¥20/month at 30 minutes of dictation a day.
 
 | Recognition | Price (approx.) | Notes |
 |---|---|---|
-| Alibaba Cloud Model Studio | CN¥1.2/hour | Recommended for Chinese |
+| Qwen / Alibaba Cloud Model Studio | CN¥1.2/hour | Recommended for Chinese |
 | Soniox | $0.12/hour | Good with mixed Chinese/English |
 | Deepgram | $0.46/hour | |
 | OpenAI / OpenRouter | $0.36/hour | Uploads after you finish; weaker on Chinese |

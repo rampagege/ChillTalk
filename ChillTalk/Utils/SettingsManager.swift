@@ -166,7 +166,7 @@ enum PolishProvider: String, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .dashScope: return String(localized: "阿里云百炼（Qwen）")
+        case .dashScope: return String(localized: "千问 / 阿里云百炼")
         case .openRouter: return "OpenRouter"
         }
     }

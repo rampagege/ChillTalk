@@ -52,7 +52,7 @@ enum ASRProviderType: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .dashScope: return String(localized: "阿里云百炼 实时语音识别")
+        case .dashScope: return String(localized: "千问 / 阿里云百炼")
         case .openRouter: return String(localized: "OpenRouter（实验）")
         default: return rawValue
         }
