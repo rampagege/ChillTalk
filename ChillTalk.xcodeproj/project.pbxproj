@@ -1,0 +1,552 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA0001 /* ChillTalkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000 /* ChillTalkApp.swift */; };
+		AA0003 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0002 /* AppState.swift */; };
+		AA0005 /* AudioCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0004 /* AudioCapture.swift */; };
+		AA0007 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0006 /* HotkeyManager.swift */; };
+		AA0009 /* TextInserter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0008 /* TextInserter.swift */; };
+		AA0011 /* ASRProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0010 /* ASRProvider.swift */; };
+		AA0013 /* DashScopeASR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0012 /* DashScopeASR.swift */; };
+		AA0015 /* DeepgramASR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0014 /* DeepgramASR.swift */; };
+		AA0017 /* OpenRouterPolish.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0016 /* OpenRouterPolish.swift */; };
+		AA0019 /* PermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0018 /* PermissionManager.swift */; };
+		AA0021 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020 /* SettingsManager.swift */; };
+		AA0025 /* RecordingHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0024 /* RecordingHUD.swift */; };
+		AA0027 /* OpenRouterASR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0026 /* OpenRouterASR.swift */; };
+		AA0029 /* LiveTranscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0028 /* LiveTranscription.swift */; };
+		AA0031 /* OpenAIWhisperASR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0030 /* OpenAIWhisperASR.swift */; };
+		AA0101 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100 /* Theme.swift */; };
+		AA0103 /* SettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0102 /* SettingsModel.swift */; };
+		AA0105 /* SettingsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0104 /* SettingsWindow.swift */; };
+		AA0107 /* OverviewPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0106 /* OverviewPage.swift */; };
+		AA0109 /* ASRPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0108 /* ASRPage.swift */; };
+		AA010B /* PolishPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010A /* PolishPage.swift */; };
+		AA010D /* HotkeyPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010C /* HotkeyPage.swift */; };
+		AA010F /* HistoryPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA010E /* HistoryPage.swift */; };
+		AA0111 /* PermissionsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0110 /* PermissionsPage.swift */; };
+		AA0113 /* HistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0112 /* HistoryStore.swift */; };
+		AA0115 /* ConnectionTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0114 /* ConnectionTester.swift */; };
+		AA0201 /* Vocabulary.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0200 /* Vocabulary.swift */; };
+		AA0203 /* CorrectionDiff.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0202 /* CorrectionDiff.swift */; };
+		AA0205 /* VocabularyPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0204 /* VocabularyPage.swift */; };
+		AA0301 /* SonioxASR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0300 /* SonioxASR.swift */; };
+		AA0321 /* MenuBarIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0320 /* MenuBarIcon.swift */; };
+		AA0341 /* PhoneticMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0340 /* PhoneticMatcher.swift */; };
+		AA0361 /* VocabularyPacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0360 /* VocabularyPacks.swift */; };
+		AA0381 /* VocabularyEvaluator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0380 /* VocabularyEvaluator.swift */; };
+		AA03A1 /* SyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA03A0 /* SyncService.swift */; };
+		AA03A3 /* SyncPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA03A2 /* SyncPage.swift */; };
+		AA03C1 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA03C0 /* Localizable.xcstrings */; };
+		AA03C3 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA03C2 /* InfoPlist.xcstrings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA0000 /* ChillTalkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChillTalkApp.swift; sourceTree = "<group>"; };
+		AA0002 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		AA0004 /* AudioCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapture.swift; sourceTree = "<group>"; };
+		AA0006 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
+		AA0008 /* TextInserter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInserter.swift; sourceTree = "<group>"; };
+		AA0010 /* ASRProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRProvider.swift; sourceTree = "<group>"; };
+		AA0012 /* DashScopeASR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashScopeASR.swift; sourceTree = "<group>"; };
+		AA0014 /* DeepgramASR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepgramASR.swift; sourceTree = "<group>"; };
+		AA0016 /* OpenRouterPolish.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenRouterPolish.swift; sourceTree = "<group>"; };
+		AA0018 /* PermissionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionManager.swift; sourceTree = "<group>"; };
+		AA0020 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		AA0024 /* RecordingHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingHUD.swift; sourceTree = "<group>"; };
+		AA0026 /* OpenRouterASR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenRouterASR.swift; sourceTree = "<group>"; };
+		AA0028 /* LiveTranscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranscription.swift; sourceTree = "<group>"; };
+		AA0030 /* OpenAIWhisperASR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIWhisperASR.swift; sourceTree = "<group>"; };
+		AA0100 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		AA0102 /* SettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsModel.swift; sourceTree = "<group>"; };
+		AA0104 /* SettingsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindow.swift; sourceTree = "<group>"; };
+		AA0106 /* OverviewPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverviewPage.swift; sourceTree = "<group>"; };
+		AA0108 /* ASRPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRPage.swift; sourceTree = "<group>"; };
+		AA010A /* PolishPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolishPage.swift; sourceTree = "<group>"; };
+		AA010C /* HotkeyPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyPage.swift; sourceTree = "<group>"; };
+		AA010E /* HistoryPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryPage.swift; sourceTree = "<group>"; };
+		AA0110 /* PermissionsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsPage.swift; sourceTree = "<group>"; };
+		AA0112 /* HistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryStore.swift; sourceTree = "<group>"; };
+		AA0114 /* ConnectionTester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionTester.swift; sourceTree = "<group>"; };
+		AA0200 /* Vocabulary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vocabulary.swift; sourceTree = "<group>"; };
+		AA0202 /* CorrectionDiff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CorrectionDiff.swift; sourceTree = "<group>"; };
+		AA0204 /* VocabularyPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyPage.swift; sourceTree = "<group>"; };
+		AA0300 /* SonioxASR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SonioxASR.swift; sourceTree = "<group>"; };
+		AA0320 /* MenuBarIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIcon.swift; sourceTree = "<group>"; };
+		AA0340 /* PhoneticMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneticMatcher.swift; sourceTree = "<group>"; };
+		AA0360 /* VocabularyPacks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyPacks.swift; sourceTree = "<group>"; };
+		AA0380 /* VocabularyEvaluator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyEvaluator.swift; sourceTree = "<group>"; };
+		AA03A0 /* SyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncService.swift; sourceTree = "<group>"; };
+		AA03A2 /* SyncPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncPage.swift; sourceTree = "<group>"; };
+		AA03C0 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		AA03C2 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		AAFF00 /* ChillTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChillTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAFF01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AAFF10 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AAFE01 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				AA0104 /* SettingsWindow.swift */,
+				AA0102 /* SettingsModel.swift */,
+				AA0100 /* Theme.swift */,
+				AAFE02 /* Pages */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		AAFE02 /* Pages */ = {
+			isa = PBXGroup;
+			children = (
+				AA03A2 /* SyncPage.swift */,
+				AA0204 /* VocabularyPage.swift */,
+				AA0110 /* PermissionsPage.swift */,
+				AA010E /* HistoryPage.swift */,
+				AA010C /* HotkeyPage.swift */,
+				AA010A /* PolishPage.swift */,
+				AA0108 /* ASRPage.swift */,
+				AA0106 /* OverviewPage.swift */,
+			);
+			path = Pages;
+			sourceTree = "<group>";
+		};
+		AAFF20 = {
+			isa = PBXGroup;
+			children = (
+				AAFF21 /* ChillTalk */,
+				AAFF22 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AAFF21 /* ChillTalk */ = {
+			isa = PBXGroup;
+			children = (
+				AA03C0 /* Localizable.xcstrings */,
+				AA03C2 /* InfoPlist.xcstrings */,
+				AA0000 /* ChillTalkApp.swift */,
+				AAFF01 /* Info.plist */,
+				AAFF30 /* Models */,
+				AAFF31 /* Core */,
+				AAFF32 /* Services */,
+				AAFF33 /* Utils */,
+				AAFF34 /* Views */,
+			);
+			path = ChillTalk;
+			sourceTree = "<group>";
+		};
+		AAFF22 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AAFF00 /* ChillTalk.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AAFF30 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AA0380 /* VocabularyEvaluator.swift */,
+				AA0360 /* VocabularyPacks.swift */,
+				AA0340 /* PhoneticMatcher.swift */,
+				AA0202 /* CorrectionDiff.swift */,
+				AA0200 /* Vocabulary.swift */,
+				AA0112 /* HistoryStore.swift */,
+				AA0002 /* AppState.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AAFF31 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				AA0004 /* AudioCapture.swift */,
+				AA0006 /* HotkeyManager.swift */,
+				AA0008 /* TextInserter.swift */,
+				AA0028 /* LiveTranscription.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		AAFF32 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				AA03A0 /* SyncService.swift */,
+				AA0114 /* ConnectionTester.swift */,
+				AAFF40 /* ASR */,
+				AAFF41 /* Polish */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		AAFF33 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				AA0018 /* PermissionManager.swift */,
+				AA0020 /* SettingsManager.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		AAFF34 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA0320 /* MenuBarIcon.swift */,
+				AAFE01 /* Settings */,
+				AA0024 /* RecordingHUD.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AAFF40 /* ASR */ = {
+			isa = PBXGroup;
+			children = (
+				AA0300 /* SonioxASR.swift */,
+				AA0010 /* ASRProvider.swift */,
+				AA0012 /* DashScopeASR.swift */,
+				AA0014 /* DeepgramASR.swift */,
+				AA0030 /* OpenAIWhisperASR.swift */,
+				AA0026 /* OpenRouterASR.swift */,
+			);
+			path = ASR;
+			sourceTree = "<group>";
+		};
+		AAFF41 /* Polish */ = {
+			isa = PBXGroup;
+			children = (
+				AA0016 /* OpenRouterPolish.swift */,
+			);
+			path = Polish;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AAFF50 /* ChillTalk */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AAFF51 /* Build configuration list for PBXNativeTarget "ChillTalk" */;
+			buildPhases = (
+				AAFF52 /* Sources */,
+				AAFF10 /* Frameworks */,
+				AAFF53 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ChillTalk;
+			productName = ChillTalk;
+			productReference = AAFF00 /* ChillTalk.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AAFF60 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					AAFF50 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = AAFF61 /* Build configuration list for PBXProject "ChillTalk" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = "zh-Hans";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				"zh-Hans",
+				en,
+				"zh-Hant",
+				ja,
+				ko,
+				Base,
+			);
+			mainGroup = AAFF20;
+			productRefGroup = AAFF22 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AAFF50 /* ChillTalk */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AAFF53 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA03C3 /* InfoPlist.xcstrings in Resources */,
+				AA03C1 /* Localizable.xcstrings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AAFF52 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0001 /* ChillTalkApp.swift in Sources */,
+				AA0003 /* AppState.swift in Sources */,
+				AA0005 /* AudioCapture.swift in Sources */,
+				AA0007 /* HotkeyManager.swift in Sources */,
+				AA0009 /* TextInserter.swift in Sources */,
+				AA0011 /* ASRProvider.swift in Sources */,
+				AA0013 /* DashScopeASR.swift in Sources */,
+				AA0015 /* DeepgramASR.swift in Sources */,
+				AA0017 /* OpenRouterPolish.swift in Sources */,
+				AA0019 /* PermissionManager.swift in Sources */,
+				AA0021 /* SettingsManager.swift in Sources */,
+				AA0025 /* RecordingHUD.swift in Sources */,
+				AA0027 /* OpenRouterASR.swift in Sources */,
+				AA0029 /* LiveTranscription.swift in Sources */,
+				AA0031 /* OpenAIWhisperASR.swift in Sources */,
+				AA03A3 /* SyncPage.swift in Sources */,
+				AA03A1 /* SyncService.swift in Sources */,
+				AA0381 /* VocabularyEvaluator.swift in Sources */,
+				AA0361 /* VocabularyPacks.swift in Sources */,
+				AA0341 /* PhoneticMatcher.swift in Sources */,
+				AA0321 /* MenuBarIcon.swift in Sources */,
+				AA0301 /* SonioxASR.swift in Sources */,
+				AA0205 /* VocabularyPage.swift in Sources */,
+				AA0203 /* CorrectionDiff.swift in Sources */,
+				AA0201 /* Vocabulary.swift in Sources */,
+				AA0115 /* ConnectionTester.swift in Sources */,
+				AA0113 /* HistoryStore.swift in Sources */,
+				AA0111 /* PermissionsPage.swift in Sources */,
+				AA010F /* HistoryPage.swift in Sources */,
+				AA010D /* HotkeyPage.swift in Sources */,
+				AA010B /* PolishPage.swift in Sources */,
+				AA0109 /* ASRPage.swift in Sources */,
+				AA0107 /* OverviewPage.swift in Sources */,
+				AA0105 /* SettingsWindow.swift in Sources */,
+				AA0103 /* SettingsModel.swift in Sources */,
+				AA0101 /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AAFF70 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AAFF71 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		AAFF72 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ChillTalk/ChillTalk.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UP36893TD4;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ChillTalk/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "ChillTalk needs microphone access to record your voice for transcription.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chilltalk.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		AAFF73 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ChillTalk/ChillTalk.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UP36893TD4;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = ChillTalk/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "ChillTalk needs microphone access to record your voice for transcription.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chilltalk.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AAFF51 /* Build configuration list for PBXNativeTarget "ChillTalk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAFF72 /* Debug */,
+				AAFF73 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AAFF61 /* Build configuration list for PBXProject "ChillTalk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAFF70 /* Debug */,
+				AAFF71 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AAFF60 /* Project object */;
+}
