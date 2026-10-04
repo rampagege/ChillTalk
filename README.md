@@ -17,17 +17,9 @@ macOS 菜单栏语音输入。轻按快捷键开始说话，再按一次结束�
 
 ## 安装
 
-**从源码**（macOS 14+、Xcode 15+）：
+从 [Releases](https://github.com/rampagege/ChillTalk/releases) 下载最新版，解压后把 ChillTalk.app 拖进「应用程序」。需要 macOS 14+。
 
-```bash
-git clone https://github.com/rampagege/ChillTalk.git
-cd ChillTalk
-./scripts/install.sh   # 编译并安装到「应用程序」，之后不依赖 Xcode
-```
-
-首次使用前，在 Xcode 的 Signing & Capabilities 里把 Team 改成你自己的（免费 Personal Team 即可）。固定的签名能让系统记住麦克风和辅助功能权限。
-
-**下载版本**：未经苹果公证，首次打开需到 系统设置 → 隐私与安全性 点「仍要打开」。
+本版本未经苹果公证，首次打开会提示无法验证开发者：到 系统设置 → 隐私与安全性 点「仍要打开」。
 
 ## 使用
 
@@ -50,7 +42,7 @@ cd ChillTalk
 
 ## 开发
 
-原生 Swift/SwiftUI，无第三方依赖。代码结构见 `ChillTalk/` 目录，界面文字在 `Localizable.xcstrings`。
+原生 Swift/SwiftUI，无第三方依赖。用 Xcode 15+ 打开 `ChillTalk.xcodeproj`，把 Signing 的 Team 改成你自己的（免费 Personal Team 即可，固定签名才能让系统记住权限），运行 `./scripts/install.sh` 编译并安装到「应用程序」。
 
 ## 许可证
 

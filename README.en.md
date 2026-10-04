@@ -17,17 +17,9 @@ Built for **domain terminology**: a personal vocabulary, learning from your corr
 
 ## Install
 
-**From source** (macOS 14+, Xcode 15+):
+Download the latest build from [Releases](https://github.com/rampagege/ChillTalk/releases), unzip it and move ChillTalk.app to Applications. Requires macOS 14+.
 
-```bash
-git clone https://github.com/rampagege/ChillTalk.git
-cd ChillTalk
-./scripts/install.sh   # builds and installs to /Applications; runs without Xcode afterwards
-```
-
-Before the first build, set your own Team under Signing & Capabilities in Xcode (a free Personal Team works). A stable signature lets macOS remember the microphone and Accessibility permissions.
-
-**Downloaded builds** are not notarized: on first launch, go to System Settings → Privacy & Security and click **Open Anyway**.
+This build is not notarized: on first launch, go to System Settings → Privacy & Security and click **Open Anyway**.
 
 ## Usage
 
@@ -50,7 +42,7 @@ Audio goes only to the recognition provider you choose; ChillTalk doesn't keep r
 
 ## Development
 
-Native Swift/SwiftUI, no third-party dependencies. Source is under `ChillTalk/`; UI strings are in `Localizable.xcstrings`.
+Native Swift/SwiftUI, no third-party dependencies. Open `ChillTalk.xcodeproj` in Xcode 15+, set Signing to your own Team (a free Personal Team works; a stable signature lets macOS remember permissions), then run `./scripts/install.sh` to build and install to Applications.
 
 ## License
 
