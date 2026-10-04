@@ -446,10 +446,6 @@ class SettingsManager {
         defaults.set(preset.rawValue, forKey: Keys.hotkeyPreset)
     }
     
-    func getHotkeyConfig() -> HotkeyConfig {
-        return getHotkeyPreset().config
-    }
-    
     // MARK: - Polish Toggle
     
     func isPolishEnabled() -> Bool {

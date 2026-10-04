@@ -8,7 +8,6 @@ class LiveTranscription: NSObject {
     private var recognitionTask: SFSpeechRecognitionTask?
     
     var onPartialResult: ((String) -> Void)?
-    var onFinalResult: ((String) -> Void)?
     var onError: ((Error) -> Void)?
     
     private var isRecognizing = false
@@ -33,32 +32,6 @@ class LiveTranscription: NSObject {
         speechRecognizer = recognizer
     }
 
-    func checkPermission(completion: @escaping (Bool) -> Void) {
-        SFSpeechRecognizer.requestAuthorization { status in
-            DispatchQueue.main.async {
-                switch status {
-                case .authorized:
-                    print("✅ Speech recognition permission granted")
-                    completion(true)
-                case .denied:
-                    print("❌ Speech recognition permission denied")
-                    completion(false)
-                case .restricted:
-                    print("❌ Speech recognition restricted")
-                    completion(false)
-                case .notDetermined:
-                    print("⚠️ Speech recognition permission not determined")
-                    completion(false)
-                @unknown default:
-                    completion(false)
-                }
-            }
-        }
-    }
-    
-    func hasPermission() -> Bool {
-        return SFSpeechRecognizer.authorizationStatus() == .authorized
-    }
     
     func startRecognition() {
         if speechRecognizer == nil { setLocale("zh-CN") }
@@ -134,12 +107,8 @@ class LiveTranscription: NSObject {
                     }
                     self.lastPartialTranscript = transcript
                     let full = self.committedTranscript + transcript
-                    if result.isFinal {
-                        print("✅ Live caption final (\(full.count) chars)")
-                        self.onFinalResult?(full)
-                    } else {
-                        self.onPartialResult?(full)
-                    }
+                    // Final results replace the partial text too.
+                    self.onPartialResult?(full)
                 }
             }
         }
