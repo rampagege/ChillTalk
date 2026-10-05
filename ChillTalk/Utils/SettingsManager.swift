@@ -235,7 +235,23 @@ class SettingsManager {
         static let assemblyAIAPIKey = "assemblyAIAPIKey"
     }
     
-    private init() {}
+    private init() {
+        migrateQwenModelDefaults()
+    }
+
+    /// The defaults moved to Qwen-Audio 3.1. Settings still holding an old default (saved
+    /// just by opening Settings) follow the new one; deliberate picks are kept.
+    private func migrateQwenModelDefaults() {
+        let flag = "migratedQwenAudio31Defaults"
+        guard !defaults.bool(forKey: flag) else { return }
+        if defaults.string(forKey: Keys.dashScopeASRModel) == "qwen-audio-3.0-asr-flash-streaming" {
+            defaults.removeObject(forKey: Keys.dashScopeASRModel)
+        }
+        if defaults.string(forKey: Keys.dashScopeBatchModel) == "qwen3-asr-flash" {
+            defaults.removeObject(forKey: Keys.dashScopeBatchModel)
+        }
+        defaults.set(true, forKey: flag)
+    }
     
     // MARK: - ASR Provider
     
@@ -337,7 +353,7 @@ class SettingsManager {
         defaults.set(model, forKey: Keys.dashScopePolishModel)
     }
     
-    static let defaultDashScopeASRModel = "qwen-audio-3.0-asr-flash-streaming"
+    static let defaultDashScopeASRModel = "qwen-audio-3.1-asr-flash-streaming"
     
     func getDashScopeASRModel() -> String {
         return nonEmpty(defaults.string(forKey: Keys.dashScopeASRModel)) ?? Self.defaultDashScopeASRModel
@@ -347,7 +363,7 @@ class SettingsManager {
         defaults.set(model, forKey: Keys.dashScopeASRModel)
     }
 
-    static let defaultDashScopeBatchModel = "qwen3-asr-flash"
+    static let defaultDashScopeBatchModel = "qwen-audio-3.1-asr-flash"
 
     /// Model for "说完再识别"; the streaming model above is used in real-time mode.
     func getDashScopeBatchModel() -> String {

@@ -10,20 +10,21 @@ struct DashScopeASRModel: Identifiable {
     let yuanPerSecond: Double
     let note: String
 
+    /// The first model of each list is the default.
     static let realtime: [DashScopeASRModel] = [
-        DashScopeASRModel(id: "qwen-audio-3.0-asr-flash-streaming", mode: .realtime, yuanPerSecond: 0.00033,
-                          note: String(localized: "推荐，稳定")),
         DashScopeASRModel(id: "qwen-audio-3.1-asr-flash-streaming", mode: .realtime, yuanPerSecond: 0.00015,
-                          note: String(localized: "最新版，按 Token 计费")),
+                          note: String(localized: "推荐，最新版")),
+        DashScopeASRModel(id: "qwen-audio-3.0-asr-flash-streaming", mode: .realtime, yuanPerSecond: 0.00033,
+                          note: String(localized: "上一代")),
         DashScopeASRModel(id: "fun-asr-realtime", mode: .realtime, yuanPerSecond: 0.00033,
                           note: String(localized: "方言和口音覆盖更广")),
     ]
 
     static let batch: [DashScopeASRModel] = [
-        DashScopeASRModel(id: "qwen3-asr-flash", mode: .batch, yuanPerSecond: 0.00022,
-                          note: String(localized: "推荐，稳定")),
         DashScopeASRModel(id: "qwen-audio-3.1-asr-flash", mode: .batch, yuanPerSecond: 0.00003,
-                          note: String(localized: "最新版，按 Token 计费，最便宜")),
+                          note: String(localized: "推荐，最新版")),
+        DashScopeASRModel(id: "qwen3-asr-flash", mode: .batch, yuanPerSecond: 0.00022,
+                          note: String(localized: "千问 ASR")),
         DashScopeASRModel(id: "qwen-audio-3.0-asr-flash", mode: .batch, yuanPerSecond: 0.00022,
                           note: String(localized: "上一代")),
     ]

@@ -27,11 +27,11 @@ This build is not notarized: on first launch, go to System Settings → Privacy 
 2. Menu bar icon → Settings… → Speech recognition: pick a provider, enter its API key, click **Test connection**
 3. In any text field, tap Right ⌥, speak, tap it again
 
-For Chinese, a pay-as-you-go key from the [Qwen AI Platform](https://www.qianwenai.com/) (Alibaba Cloud Model Studio) covers both recognition and polish, with a 90-day free quota for new users — about CN¥20/month at 30 minutes of dictation a day.
+For Chinese, a pay-as-you-go key from the [Qwen AI Platform](https://www.qianwenai.com/) (Alibaba Cloud Model Studio) covers both recognition and polish, with a 90-day free quota for new users — about CN¥10/month at 30 minutes of dictation a day.
 
 | Recognition | Price (approx.) | Notes |
 |---|---|---|
-| Qwen / Alibaba Cloud Model Studio | CN¥1.2/hour | Recommended for Chinese |
+| Qwen / Alibaba Cloud Model Studio | CN¥0.5/hour real-time, CN¥0.1/hour after you finish | Recommended for Chinese |
 | Soniox | $0.12/hour | Good with mixed Chinese/English |
 | AssemblyAI | $0.45/hour | $50 free for new users; mixed Chinese/English |
 | Deepgram | $0.46/hour | |
