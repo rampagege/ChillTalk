@@ -9480,6 +9480,74 @@
           }
         }
       }
+    },
+    "说完再识别 · qwen3-asr-flash · 约 ¥0.8/小时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After you finish · qwen3-asr-flash · about CN¥0.8/hour"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "話し終えてから認識 · qwen3-asr-flash · 約 0.8 人民元/時間"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말을 마친 후 인식 · qwen3-asr-flash · 시간당 약 0.8위안"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "说完再识别 · qwen3-asr-flash · 约 ¥0.8/小时"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "說完再辨識 · qwen3-asr-flash · 約人民幣 0.8 元/小時"
+          }
+        }
+      }
+    },
+    "说完再识别 · 约 $0.26/小时 · 新用户送 $50 · 服务在国外": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After you finish · about $0.26/hour · $50 free for new users · hosted outside China"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "話し終えてから認識 · 約 $0.26/時間 · 新規ユーザーは $50 分無料 · 海外のサービス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말을 마친 후 인식 · 시간당 약 $0.26 · 신규 사용자 $50 무료 · 해외 서비스"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "说完再识别 · 约 $0.26/小时 · 新用户送 $50 · 服务在国外"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "說完再辨識 · 約 $0.26/小時 · 新使用者送 $50 · 服務位於海外"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

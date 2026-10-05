@@ -80,7 +80,7 @@ struct ASRPage: View {
                         set: { model[keyPath: model.asrKeyBinding] = $0 }
                     ))
                 }
-                if model.asrProvider == .dashScope {
+                if model.asrProvider == .dashScope && effectiveMode == .realtime {
                     CardDivider()
                     CardRow(label: String(localized: "识别模型"), detail: String(localized: "需为实时流式模型（名称含 streaming 或 realtime）"),
                             savedKey: "dashScopeASRModel") {
@@ -173,7 +173,16 @@ struct ASRPage: View {
         }
     }
 
+    private var effectiveMode: RecognitionMode {
+        model.asrProvider.effectiveMode(model.recognitionMode)
+    }
+
     private var providerNote: String {
+        switch (model.asrProvider, effectiveMode) {
+        case (.dashScope, .batch): return String(localized: "说完再识别 · qwen3-asr-flash · 约 ¥0.8/小时")
+        case (.assemblyAI, .batch): return String(localized: "说完再识别 · 约 $0.26/小时 · 新用户送 $50 · 服务在国外")
+        default: break
+        }
         switch model.asrProvider {
         case .dashScope: return String(localized: "实时流式 · 约 ¥1.2/小时")
         case .deepgram: return String(localized: "实时流式 · 普通话（zh-CN）")
