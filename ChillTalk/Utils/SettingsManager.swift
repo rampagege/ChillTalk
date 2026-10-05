@@ -219,6 +219,7 @@ class SettingsManager {
         static let dictationLanguage = "dictationLanguage"
         static let mixEnglish = "mixEnglish"
         static let voiceProcessing = "voiceProcessing"
+        static let recognitionMode = "recognitionMode"
         static let polishProvider = "polishProvider"
         static let hotkeyPreset = "hotkeyPreset"
         static let polishEnabled = "polishEnabled"
@@ -393,6 +394,14 @@ class SettingsManager {
     
     func setVoiceProcessingEnabled(_ enabled: Bool) {
         defaults.set(enabled, forKey: Keys.voiceProcessing)
+    }
+    
+    func getRecognitionMode() -> RecognitionMode {
+        defaults.string(forKey: Keys.recognitionMode).flatMap(RecognitionMode.init(rawValue:)) ?? .realtime
+    }
+    
+    func setRecognitionMode(_ mode: RecognitionMode) {
+        defaults.set(mode.rawValue, forKey: Keys.recognitionMode)
     }
     
     // MARK: - Output

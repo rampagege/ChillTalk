@@ -1,6 +1,5 @@
 import SwiftUI
 import Combine
-import Speech
 
 @main
 struct ChillTalkApp: App {
@@ -74,7 +73,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     private var hotkeyManager: HotkeyManager!
     private let audioCapture = AudioCapture()
     private let textInserter = TextInserter()
-    private let liveTranscription = LiveTranscription()
     private var cancellables = Set<AnyCancellable>()
 
     private var dictationID = UUID()
@@ -85,6 +83,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     private var currentRawText = ""
     private var currentAudioSeconds: TimeInterval = 0
     private var currentProvider: ASRProviderType = .dashScope
+    private var currentMode: RecognitionMode = .realtime
     private var errorResetWork: DispatchWorkItem?
 
     override init() {
@@ -104,16 +103,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             SyncService.shared.start()
         }
 
-        liveTranscription.onPartialResult = { transcript in
-            RecordingHUDController.shared.updateLiveTranscript(transcript)
-        }
-        liveTranscription.onError = { error in
-            print("⚠️ Live transcription error: \(error.localizedDescription)")
-        }
-
-        audioCapture.onAudioBuffer = { [weak self] buffer in
-            self?.liveTranscription.appendAudioBuffer(buffer)
-        }
         audioCapture.onAudioLevel = { level in
             RecordingHUDController.shared.updateAudioLevel(level)
         }
@@ -239,14 +228,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         errorResetWork?.cancel()
 
         let hints = MainActor.assumeIsolated { VocabularyStore.shared.recognitionHints() }
-        let session = provider.makeSession(apiKey: apiKey, hints: hints)
+        let mode = provider.effectiveMode(settings.getRecognitionMode())
+        currentMode = mode
+        let session = provider.makeSession(apiKey: apiKey, hints: hints, mode: mode)
         session.onError = { [weak self] error in
             // Streaming ASR failed mid-recording: stop now instead of after the user finishes.
             guard let self = self, self.dictationID == id else { return }
             self.cancelDictation()
             self.showError(String(localized: "转录失败：\(error.localizedDescription)"))
         }
-        if provider.streamsPartials {
+        // Real-time sessions show their text as the user speaks; batch shows only the waveform.
+        if mode == .realtime {
             let language = hints.language
             session.onPartialTranscript = { [weak self] text in
                 guard let self = self, self.dictationID == id else { return }
@@ -268,36 +260,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
         asrSession = session
         appState.recordingState = .recording
-        // Streaming providers show their own text, which is also what gets inserted.
-        // Apple captions are only a preview for upload-only providers.
-        if !provider.streamsPartials {
-            startLiveCaptions(for: id)
-        }
     }
 
-    private func startLiveCaptions(for id: UUID) {
-        switch SFSpeechRecognizer.authorizationStatus() {
-        case .authorized:
-            liveTranscription.setLocale(SettingsManager.shared.getDictationLanguage().appleLocale)
-            liveTranscription.startRecognition()
-        case .notDetermined:
-            SFSpeechRecognizer.requestAuthorization { [weak self] status in
-                DispatchQueue.main.async {
-                    guard let self = self, status == .authorized,
-                          self.dictationID == id, self.appState.recordingState == .recording else { return }
-                    self.liveTranscription.setLocale(SettingsManager.shared.getDictationLanguage().appleLocale)
-                    self.liveTranscription.startRecognition()
-                }
-            }
-        default:
-            // Live captions are optional; don't nag on every recording.
-            break
-        }
-    }
 
     private func stopRecording() {
         let duration = audioCapture.stopRecording()
-        liveTranscription.stopRecognition()
 
         guard let session = asrSession else {
             appState.recordingState = .idle
@@ -339,7 +306,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     private func cancelDictation() {
         dictationID = UUID()
         audioCapture.stopRecording()
-        liveTranscription.stopRecognition()
         asrSession?.cancel()
         asrSession = nil
     }
@@ -415,7 +381,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     }
     
     private func recordHistory(finalText: String, polishedWith: PolishProvider?) {
-        let cost = currentAudioSeconds * currentProvider.estimatedYuanPerSecond
+        let cost = currentAudioSeconds * currentProvider.estimatedYuanPerSecond(currentMode)
             + (polishedWith?.estimatedYuan(characters: currentRawText.count) ?? 0)
         let raw = currentRawText, seconds = currentAudioSeconds, provider = currentProvider.shortName
         // The pipeline always runs on the main thread.

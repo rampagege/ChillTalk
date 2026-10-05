@@ -1,150 +1,114 @@
 {
-  "sourceLanguage" : "zh-Hans",
-  "strings" : {
-    "CFBundleName" : {
-      "comment" : "Bundle name",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk"
+  "sourceLanguage": "zh-Hans",
+  "strings": {
+    "CFBundleName": {
+      "comment": "Bundle name",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChillTalk"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChillTalk"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChillTalk"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "ChillTalk"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "ChillTalk"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChillTalk"
           }
         }
       }
     },
-    "NSHumanReadableCopyright" : {
-      "comment" : "Copyright (human-readable)",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MIT License"
+    "NSHumanReadableCopyright": {
+      "comment": "Copyright (human-readable)",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MIT License"
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MIT License"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MIT License"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MIT License"
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MIT License"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "MIT License"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "MIT License"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "MIT License"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MIT License"
           }
         }
       }
     },
-    "NSMicrophoneUsageDescription" : {
-      "comment" : "Privacy - Microphone Usage Description",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk needs microphone access to record and transcribe your voice."
+    "NSMicrophoneUsageDescription": {
+      "comment": "Privacy - Microphone Usage Description",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChillTalk needs microphone access to record and transcribe your voice."
           }
         },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk は、音声を録音して文字に書き起こすためにマイクへのアクセスを必要とします。"
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChillTalk は、音声を録音して文字に書き起こすためにマイクへのアクセスを必要とします。"
           }
         },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk가 음성을 녹음하고 텍스트로 변환하려면 마이크에 접근해야 합니다."
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChillTalk가 음성을 녹음하고 텍스트로 변환하려면 마이크에 접근해야 합니다."
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "ChillTalk 需要访问麦克风来录制您的语音并进行转录。"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "new",
+            "value": "ChillTalk 需要访问麦克风来录制您的语音并进行转录。"
           }
         },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk 需要存取麥克風來錄製您的語音並轉寫成文字。"
-          }
-        }
-      }
-    },
-    "NSSpeechRecognitionUsageDescription" : {
-      "comment" : "Privacy - Speech Recognition Usage Description",
-      "extractionState" : "extracted_with_value",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk needs speech recognition permission to show what you say in real time."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk は、話している内容をリアルタイムで表示するために音声認識へのアクセスを必要とします。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk가 말하는 내용을 실시간으로 표시하려면 음성 인식 권한이 필요합니다."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "ChillTalk 需要语音识别权限来实时显示您说话的内容。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ChillTalk 需要語音辨識權限，以即時顯示您說話的內容。"
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ChillTalk 需要存取麥克風來錄製您的語音並轉寫成文字。"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

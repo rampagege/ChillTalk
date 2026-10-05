@@ -23,8 +23,6 @@ enum AudioCaptureError: LocalizedError {
 /// recording, so the system mic indicator stays off when idle. Input device changes
 /// mid-recording (e.g. AirPods connecting) rebuild the tap with the new format.
 final class AudioCapture {
-    /// Raw input buffers for Apple live captions. Called on the audio thread.
-    var onAudioBuffer: ((AVAudioPCMBuffer) -> Void)?
     /// Input level 0.0…1.0. Called on the audio thread.
     var onAudioLevel: ((Double) -> Void)?
     /// Called on the main queue if recording can't continue after a device change.
@@ -173,7 +171,6 @@ final class AudioCapture {
 
     private func process(_ buffer: AVAudioPCMBuffer, converter: AVAudioConverter) {
         onAudioLevel?(Self.level(of: buffer))
-        onAudioBuffer?(buffer)
 
         let ratio = targetFormat.sampleRate / buffer.format.sampleRate
         let capacity = AVAudioFrameCount((Double(buffer.frameLength) * ratio).rounded(.up)) + 32

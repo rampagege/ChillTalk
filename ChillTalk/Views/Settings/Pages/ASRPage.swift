@@ -27,6 +27,31 @@ struct ASRPage: View {
                 }
             }
 
+            Card(title: String(localized: "识别方式")) {
+                CardRow(label: String(localized: "识别方式"), detail: modeDetail, savedKey: "recognitionMode") {
+                    Picker("", selection: $model.recognitionMode) {
+                        ForEach(RecognitionMode.allCases) { mode in
+                            Text(mode.displayName).tag(mode)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
+                    .frame(width: 220)
+                }
+                if model.asrProvider.effectiveMode(model.recognitionMode) != model.recognitionMode {
+                    CardDivider()
+                    Label(model.asrProvider.supportsRealtime
+                          ? String(localized: "当前服务商只支持实时识别，会自动使用实时")
+                          : String(localized: "当前服务商只支持说完再识别，会自动使用说完再识别"),
+                          systemImage: "info.circle")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                }
+            }
+
             Card(title: String(localized: "麦克风")) {
                 CardRow(label: String(localized: "语音增强"),
                         detail: String(localized: "回声消除 + 降噪 + 自动增益。适合外放音乐或视频、旁边有人说话、小声说话时使用；安静环境下不必开启。开启后会略微压低其他 App 的音量，并可在控制中心的「麦克风模式」里选择「人声隔离」。"),
@@ -87,6 +112,13 @@ struct ASRPage: View {
                 }
                 .id(model.asrProvider)  // reset the result when switching provider
             }
+        }
+    }
+
+    private var modeDetail: String {
+        switch model.recognitionMode {
+        case .realtime: return String(localized: "边说边识别，说完立刻出字，录音时显示文字")
+        case .batch: return String(localized: "说完后整段识别：更便宜、通常更准，但要多等 1–3 秒；录音时只显示声音波纹")
         }
     }
 

@@ -111,3 +111,109 @@ final class AssemblyAIASR: WebSocketASRSession {
         return String(data: data, encoding: .utf8)
     }
 }
+
+/// AssemblyAI pre-recorded transcription ("说完再识别"): upload → submit → poll.
+/// Universal-3.5 Pro costs less than real-time and sees the whole recording.
+final class AssemblyAIBatchASR: BufferedASRSession {
+    private let apiKey: String
+    private let hints: RecognitionHints
+    private let base = "https://api.assemblyai.com/v2"
+    /// Pre-recorded Universal-3.5 Pro accepts up to 1000 key terms.
+    static let maxKeyterms = 1000
+    private static let pollInterval: TimeInterval = 0.3
+    private static let timeout: TimeInterval = 90
+
+    init(apiKey: String, hints: RecognitionHints = .none) {
+        self.apiKey = apiKey
+        self.hints = hints
+    }
+
+    override func upload(pcm: Data, completion: @escaping (Result<String, Error>) -> Void) -> URLSessionTask? {
+        guard !pcm.isEmpty else { completion(.failure(ASRError.noTranscript)); return nil }
+        var request = makeRequest("\(base)/upload", method: "POST")
+        request.setValue("application/octet-stream", forHTTPHeaderField: "Content-Type")
+        request.httpBody = WAVEncoder.wav(fromPCM: pcm)
+        return send(request, completion: completion) { [weak self] json in
+            guard let self = self, let url = json["upload_url"] as? String else {
+                completion(.failure(ASRError.invalidResponse)); return
+            }
+            self.submit(audioURL: url, completion: completion)
+        }
+    }
+
+    private func submit(audioURL: String, completion: @escaping (Result<String, Error>) -> Void) {
+        var body: [String: Any] = ["audio_url": audioURL, "speech_models": ["universal-3-5-pro", "universal-2"]]
+        var languages: [String] = []
+        for code in hints.languageCodes.map({ $0 == "yue" ? "zh" : $0 }) where !languages.contains(code) {
+            languages.append(code)
+        }
+        if languages.count > 1 {
+            body["language_codes"] = languages       // code switching, e.g. zh + en
+        } else if let code = languages.first {
+            body["language_code"] = code
+        }
+        let terms = hints.hotwords.sorted { $0.value > $1.value }.map(\.key).prefix(Self.maxKeyterms)
+        if !terms.isEmpty { body["keyterms_prompt"] = Array(terms) }
+
+        var request = makeRequest("\(base)/transcript", method: "POST")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        if let task = send(request, completion: completion, onJSON: { [weak self] json in
+            guard let self = self, let id = json["id"] as? String else {
+                completion(.failure(ASRError.invalidResponse)); return
+            }
+            self.poll(id: id, deadline: Date().addingTimeInterval(Self.timeout), completion: completion)
+        }) { track(task) }
+    }
+
+    private func poll(id: String, deadline: Date, completion: @escaping (Result<String, Error>) -> Void) {
+        guard !isCancelledNow else { return }
+        guard Date() < deadline else { completion(.failure(ASRError.timeout)); return }
+        DispatchQueue.global().asyncAfter(deadline: .now() + Self.pollInterval) { [weak self] in
+            guard let self = self, !self.isCancelledNow else { return }
+            let request = self.makeRequest("\(self.base)/transcript/\(id)", method: "GET")
+            if let task = self.send(request, completion: completion, onJSON: { [weak self] json in
+                switch json["status"] as? String {
+                case "completed":
+                    let text = (json["text"] as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                    completion(text.isEmpty ? .failure(ASRError.noTranscript)
+                                            : .success(TranscriptJoiner.removingSpacesBetweenCJK(text)))
+                case "error":
+                    completion(.failure(ASRError.apiError("AssemblyAI: \(json["error"] as? String ?? "unknown")")))
+                default:
+                    self?.poll(id: id, deadline: deadline, completion: completion)
+                }
+            }) { self.track(task) }
+        }
+    }
+
+    private func makeRequest(_ url: String, method: String) -> URLRequest {
+        var request = URLRequest(url: URL(string: url)!)
+        request.httpMethod = method
+        request.timeoutInterval = 30
+        request.setValue(apiKey, forHTTPHeaderField: "Authorization")
+        return request
+    }
+
+    @discardableResult
+    private func send(_ request: URLRequest, completion: @escaping (Result<String, Error>) -> Void,
+                      onJSON: @escaping ([String: Any]) -> Void) -> URLSessionTask? {
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                if (error as NSError).code != NSURLErrorCancelled {
+                    completion(.failure(ASRError.networkError(error.localizedDescription)))
+                }
+                return
+            }
+            if let httpError = HTTPResponseCheck.error(for: response, data: data) {
+                completion(.failure(httpError)); return
+            }
+            guard let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                completion(.failure(ASRError.invalidResponse)); return
+            }
+            onJSON(json)
+        }
+        task.resume()
+        return task
+    }
+}

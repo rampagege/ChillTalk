@@ -73,6 +73,9 @@ final class SettingsModel: ObservableObject {
     @Published var mixEnglish: Bool {
         didSet { settings.setMixesEnglish(mixEnglish); markSaved("mixEnglish") }
     }
+    @Published var recognitionMode: RecognitionMode {
+        didSet { settings.setRecognitionMode(recognitionMode); markSaved("recognitionMode") }
+    }
     @Published var voiceProcessing: Bool {
         didSet { settings.setVoiceProcessingEnabled(voiceProcessing); markSaved("voiceProcessing") }
     }
@@ -118,6 +121,7 @@ final class SettingsModel: ObservableObject {
         dictationLanguage = settings.getDictationLanguage()
         mixEnglish = settings.mixesEnglish()
         voiceProcessing = settings.isVoiceProcessingEnabled()
+        recognitionMode = settings.getRecognitionMode()
         syncObserver = NotificationCenter.default.addObserver(
             forName: .settingsSyncedFromCloud, object: nil, queue: .main
         ) { [weak self] _ in
@@ -168,6 +172,7 @@ final class SettingsModel: ObservableObject {
         if dictationLanguage != settings.getDictationLanguage() { dictationLanguage = settings.getDictationLanguage() }
         if mixEnglish != settings.mixesEnglish() { mixEnglish = settings.mixesEnglish() }
         if voiceProcessing != settings.isVoiceProcessingEnabled() { voiceProcessing = settings.isVoiceProcessingEnabled() }
+        if recognitionMode != settings.getRecognitionMode() { recognitionMode = settings.getRecognitionMode() }
         pendingSaves.values.forEach { $0.cancel() }
         pendingSaves.removeAll()
     }

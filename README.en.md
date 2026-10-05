@@ -8,7 +8,7 @@ Built for **domain terminology**: a personal vocabulary, learning from your corr
 
 ## Features
 
-- Global hotkey (Right ⌥ by default), Esc to cancel; text streams in as you speak and is inserted when you finish
+- Global hotkey (Right ⌥ by default), Esc to cancel; choose real-time (text as you speak) or after-you-finish (cheaper, usually more accurate)
 - LLM polish: removes filler words, adds punctuation, resolves self-corrections, keeps your meaning
 - Vocabulary: hot words, key terms, background context, automatic replacement of misheard spellings, sound-alike correction, industry packs
 - Correct a mistake in History and it becomes a rule

@@ -21,14 +21,6 @@ struct PermissionsPage: View {
                     granted: status.accessibility,
                     action: { PermissionManager.shared.checkAccessibilityPermission() }
                 )
-                CardDivider()
-                PermissionRow(
-                    icon: "text.bubble.fill",
-                    title: String(localized: "语音识别"),
-                    detail: String(localized: "只在使用 OpenAI / OpenRouter 时显示实时字幕。可选。"),
-                    granted: status.speech,
-                    action: { PermissionManager.shared.checkSpeechRecognitionPermission { _ in status.refresh() } }
-                )
             }
         }
         .onAppear { status.refresh() }

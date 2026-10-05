@@ -60,7 +60,7 @@ final class SyncService: ObservableObject {
     static let settingKeys = [
         "asrProvider", "dashScopeASRModel", "polishEnabled", "polishProvider", "dashScopePolishModel",
         "openRouterModel", "hotkeyPreset", "trailingPeriod", "phoneticCorrection",
-        "dictationLanguage", "mixEnglish", "voiceProcessing"
+        "dictationLanguage", "mixEnglish", "voiceProcessing", "recognitionMode"
     ]
     private static let contextKey = "recognitionContext"
 

@@ -159,3 +159,75 @@ final class DashScopeASR: WebSocketASRSession {
         send(text: string)
     }
 }
+
+/// Qwen-ASR on the whole recording ("说完再识别"): one OpenAI-compatible request with the
+/// audio inline. Cheaper than streaming and sees the full sentence, at the cost of waiting
+/// for the upload and recognition after the user stops.
+final class QwenBatchASR: BufferedASRSession {
+    private let apiKey: String
+    private let hints: RecognitionHints
+    private let model = "qwen3-asr-flash"
+    private let endpoint = URL(string: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions")!
+    /// The API accepts at most 5 minutes (10 MB) per request.
+    static let maxSeconds: Double = 290
+
+    init(apiKey: String, hints: RecognitionHints = .none) {
+        self.apiKey = apiKey
+        self.hints = hints
+    }
+
+    override func upload(pcm: Data, completion: @escaping (Result<String, Error>) -> Void) -> URLSessionTask? {
+        guard !pcm.isEmpty else { completion(.failure(ASRError.noTranscript)); return nil }
+        guard Double(pcm.count) / 32000 <= Self.maxSeconds else {
+            completion(.failure(ASRError.apiError(String(localized: "录音超过 5 分钟，请改用实时识别"))))
+            return nil
+        }
+
+        var messages: [[String: Any]] = []
+        // Context biasing: the background description plus vocabulary terms.
+        let terms = hints.hotwords.sorted { $0.value > $1.value }.map(\.key).prefix(200)
+        let context = ([hints.context] + (terms.isEmpty ? [] : [terms.joined(separator: "、")]))
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n")
+        if !context.isEmpty {
+            messages.append(["role": "system", "content": [["type": "text", "text": context]]])
+        }
+        let audio = "data:audio/wav;base64," + WAVEncoder.wav(fromPCM: pcm).base64EncodedString()
+        messages.append(["role": "user", "content": [["type": "input_audio", "input_audio": ["data": audio]]]])
+
+        var asrOptions: [String: Any] = ["enable_itn": true]
+        if let language = hints.singleLanguage { asrOptions["language"] = language }
+        let body: [String: Any] = ["model": model, "messages": messages, "stream": false, "asr_options": asrOptions]
+
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 60
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(ASRError.networkError(error.localizedDescription)))
+                return
+            }
+            if let httpError = HTTPResponseCheck.error(for: response, data: data) {
+                completion(.failure(httpError))
+                return
+            }
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let choice = (json["choices"] as? [[String: Any]])?.first,
+                  let message = choice["message"] as? [String: Any],
+                  let text = message["content"] as? String else {
+                completion(.failure(ASRError.invalidResponse))
+                return
+            }
+            let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            completion(trimmed.isEmpty ? .failure(ASRError.noTranscript) : .success(trimmed))
+        }
+        task.resume()
+        return task
+    }
+}

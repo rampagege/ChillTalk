@@ -243,7 +243,6 @@ private struct SidebarItem: View {
 final class PermissionStatus: ObservableObject {
     @Published private(set) var microphone = false
     @Published private(set) var accessibility = false
-    @Published private(set) var speech = false
     private var observer: NSObjectProtocol?
 
     var missingCount: Int { [microphone, accessibility].filter { !$0 }.count }
@@ -265,6 +264,5 @@ final class PermissionStatus: ObservableObject {
         let pm = PermissionManager.shared
         microphone = pm.hasMicrophonePermission()
         accessibility = pm.hasAccessibilityPermission()
-        speech = pm.hasSpeechRecognitionPermission()
     }
 }

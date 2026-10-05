@@ -2307,40 +2307,6 @@
         }
       }
     },
-    "只在使用 OpenAI / OpenRouter 时显示实时字幕。可选。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shows live captions only when using OpenAI / OpenRouter. Optional."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenAI / OpenRouter を使用しているときのみ、リアルタイム字幕を表示します。任意。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenAI / OpenRouter 사용 시에만 실시간 자막을 표시합니다. 선택 사항."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "只在使用 OpenAI / OpenRouter 时显示实时字幕。可选。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "只在使用 OpenAI / OpenRouter 時顯示即時字幕。選用。"
-          }
-        }
-      }
-    },
     "可能误改：这些你没改过的记录，按当前词库会被改动": {
       "localizations": {
         "en": {
@@ -3361,6 +3327,40 @@
         }
       }
     },
+    "实时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-time"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リアルタイム"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실시간"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实时"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即時"
+          }
+        }
+      }
+    },
     "实时流式 · 普通话（zh-CN）": {
       "localizations": {
         "en": {
@@ -4245,6 +4245,74 @@
         }
       }
     },
+    "当前服务商只支持实时识别，会自动使用实时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This provider only supports real-time, so real-time is used"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このプロバイダはリアルタイムのみ対応のため、リアルタイムを使います"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 제공업체는 실시간만 지원하므로 실시간을 사용합니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前服务商只支持实时识别，会自动使用实时"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前的服務商只支援即時辨識，會自動使用即時"
+          }
+        }
+      }
+    },
+    "当前服务商只支持说完再识别，会自动使用说完再识别": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This provider only transcribes after you finish, so that mode is used"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このプロバイダは話し終えてからの認識のみ対応のため、その方式を使います"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 제공업체는 말을 마친 후 인식만 지원하므로 그 방식을 사용합니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前服务商只支持说完再识别，会自动使用说完再识别"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前的服務商只支援說完再辨識，會自動使用說完再辨識"
+          }
+        }
+      }
+    },
     "录制你的语音。必需。": {
       "localizations": {
         "en": {
@@ -4377,6 +4445,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "錄音失敗：%@"
+          }
+        }
+      }
+    },
+    "录音超过 5 分钟，请改用实时识别": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recording is longer than 5 minutes; use real-time mode instead"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "録音が 5 分を超えています。リアルタイム方式を使ってください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "녹음이 5분을 넘었습니다. 실시간 방식을 사용하세요"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "录音超过 5 分钟，请改用实时识别"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "錄音超過 5 分鐘，請改用即時辨識"
           }
         }
       }
@@ -7679,6 +7781,40 @@
         }
       }
     },
+    "识别方式": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recognition mode"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "認識方式"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "인식 방식"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "识别方式"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "辨識方式"
+          }
+        }
+      }
+    },
     "识别模型": {
       "localizations": {
         "en": {
@@ -7917,6 +8053,40 @@
         }
       }
     },
+    "说完再识别": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After you finish"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "話し終えてから"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말을 마친 후"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "说完再识别"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "說完再辨識"
+          }
+        }
+      }
+    },
     "说完后整段上传": {
       "localizations": {
         "en": {
@@ -7947,6 +8117,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "說完後整段上傳"
+          }
+        }
+      }
+    },
+    "说完后整段识别：更便宜、通常更准，但要多等 1–3 秒；录音时只显示声音波纹": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcribes the whole recording after you stop: cheaper and usually more accurate, but takes 1–3 seconds longer; only the waveform shows while recording"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "話し終えてからまとめて認識します。安くて通常はより正確ですが、1〜3 秒ほど余計にかかります。録音中は波形のみ表示します"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말을 마친 후 전체를 인식합니다. 더 저렴하고 보통 더 정확하지만 1~3초 더 걸리며, 녹음 중에는 파형만 표시됩니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "说完后整段识别：更便宜、通常更准，但要多等 1–3 秒；录音时只显示声音波纹"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "說完後整段辨識：更便宜、通常更準，但要多等 1–3 秒；錄音時只顯示聲音波紋"
           }
         }
       }
@@ -8321,6 +8525,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "輸出繁體中文（台灣用字）；辨識結果會自動轉為繁體"
+          }
+        }
+      }
+    },
+    "边说边识别，说完立刻出字，录音时显示文字": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcribes as you speak; text appears the moment you stop and is shown while recording"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "話しながら認識し、話し終えるとすぐに入力されます。録音中も文字を表示します"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말하는 동안 인식하고, 말을 마치면 바로 입력됩니다. 녹음 중에도 텍스트를 표시합니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "边说边识别，说完立刻出字，录音时显示文字"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "邊說邊辨識，說完立刻出字，錄音時顯示文字"
           }
         }
       }

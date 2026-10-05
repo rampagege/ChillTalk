@@ -20,7 +20,6 @@
 		AA0021 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0020 /* SettingsManager.swift */; };
 		AA0025 /* RecordingHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0024 /* RecordingHUD.swift */; };
 		AA0027 /* OpenRouterASR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0026 /* OpenRouterASR.swift */; };
-		AA0029 /* LiveTranscription.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0028 /* LiveTranscription.swift */; };
 		AA0031 /* OpenAIWhisperASR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0030 /* OpenAIWhisperASR.swift */; };
 		AA0101 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0100 /* Theme.swift */; };
 		AA0103 /* SettingsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0102 /* SettingsModel.swift */; };
@@ -62,7 +61,6 @@
 		AA0020 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
 		AA0024 /* RecordingHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingHUD.swift; sourceTree = "<group>"; };
 		AA0026 /* OpenRouterASR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenRouterASR.swift; sourceTree = "<group>"; };
-		AA0028 /* LiveTranscription.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveTranscription.swift; sourceTree = "<group>"; };
 		AA0030 /* OpenAIWhisperASR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIWhisperASR.swift; sourceTree = "<group>"; };
 		AA0100 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		AA0102 /* SettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsModel.swift; sourceTree = "<group>"; };
@@ -181,7 +179,6 @@
 				AA0004 /* AudioCapture.swift */,
 				AA0006 /* HotkeyManager.swift */,
 				AA0008 /* TextInserter.swift */,
-				AA0028 /* LiveTranscription.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -326,7 +323,6 @@
 				AA0021 /* SettingsManager.swift in Sources */,
 				AA0025 /* RecordingHUD.swift in Sources */,
 				AA0027 /* OpenRouterASR.swift in Sources */,
-				AA0029 /* LiveTranscription.swift in Sources */,
 				AA0031 /* OpenAIWhisperASR.swift in Sources */,
 				AA03A3 /* SyncPage.swift in Sources */,
 				AA03A1 /* SyncService.swift in Sources */,

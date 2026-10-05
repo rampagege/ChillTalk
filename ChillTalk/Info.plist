@@ -30,8 +30,6 @@
 	<string>MIT License</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>ChillTalk 需要访问麦克风来录制您的语音并进行转录。</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>ChillTalk 需要语音识别权限来实时显示您说话的内容。</string>
 	<key>NSSupportsAutomaticTermination</key>
 	<true/>
 	<key>NSSupportsSuddenTermination</key>

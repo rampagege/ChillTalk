@@ -1,7 +1,6 @@
 import AVFoundation
 import ApplicationServices
 import Cocoa
-import Speech
 
 class PermissionManager {
     static let shared = PermissionManager()
@@ -12,7 +11,6 @@ class PermissionManager {
         DispatchQueue.main.async {
             self.checkMicrophonePermission()
             self.checkAccessibilityPermission()
-            self.checkSpeechRecognitionPermission()
         }
     }
     
@@ -108,66 +106,6 @@ class PermissionManager {
             let response = alert.runModal()
             if response == .alertFirstButtonReturn {
                 self.openSystemPreferences(pane: "Privacy_Accessibility")
-            }
-        }
-    }
-    
-    // MARK: - Speech Recognition Permission
-    
-    func hasSpeechRecognitionPermission() -> Bool {
-        return SFSpeechRecognizer.authorizationStatus() == .authorized
-    }
-    
-    @discardableResult
-    func checkSpeechRecognitionPermission(completion: ((Bool) -> Void)? = nil) -> Bool {
-        let status = SFSpeechRecognizer.authorizationStatus()
-        
-        switch status {
-        case .authorized:
-            print("✅ Speech recognition permission granted")
-            completion?(true)
-            return true
-            
-        case .notDetermined:
-            print("⚠️ Speech recognition permission not determined, requesting...")
-            SFSpeechRecognizer.requestAuthorization { newStatus in
-                DispatchQueue.main.async {
-                    if newStatus == .authorized {
-                        print("✅ Speech recognition permission granted")
-                        completion?(true)
-                    } else {
-                        print("❌ Speech recognition permission denied")
-                        self.showSpeechRecognitionPermissionAlert()
-                        completion?(false)
-                    }
-                }
-            }
-            return false
-            
-        case .denied, .restricted:
-            print("❌ Speech recognition permission denied or restricted")
-            showSpeechRecognitionPermissionAlert()
-            completion?(false)
-            return false
-            
-        @unknown default:
-            completion?(false)
-            return false
-        }
-    }
-    
-    private func showSpeechRecognitionPermissionAlert() {
-        DispatchQueue.main.async {
-            let alert = NSAlert()
-            alert.messageText = String(localized: "需要语音识别权限")
-            alert.informativeText = String(localized: "ChillTalk 需要语音识别权限来实时显示您说话的内容。请在系统设置中授予权限。")
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: String(localized: "打开系统设置"))
-            alert.addButton(withTitle: String(localized: "取消"))
-            
-            let response = alert.runModal()
-            if response == .alertFirstButtonReturn {
-                self.openSystemPreferences(pane: "Privacy_SpeechRecognition")
             }
         }
     }

@@ -42,6 +42,22 @@ struct RecognitionHints {
     static let none = RecognitionHints()
 }
 
+/// When recognition happens: while the user speaks (live text, fastest result) or on the
+/// whole recording after they stop (cheaper, sees full context, waveform-only HUD).
+enum RecognitionMode: String, CaseIterable, Identifiable {
+    case realtime
+    case batch
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .realtime: return String(localized: "实时")
+        case .batch: return String(localized: "说完再识别")
+        }
+    }
+}
+
 enum ASRProviderType: String, CaseIterable {
     // Raw value is persisted in UserDefaults; keep it stable.
     case dashScope = "DashScope Fun-ASR"
@@ -59,18 +75,36 @@ enum ASRProviderType: String, CaseIterable {
         }
     }
 
-    /// Whether the provider reports text while the user is still speaking. Otherwise the
-    /// HUD falls back to Apple's on-device live captions.
-    var streamsPartials: Bool {
+    var supportsRealtime: Bool {
         switch self {
         case .dashScope, .deepgram, .soniox, .assemblyAI: return true
         case .openAIWhisper, .openRouter: return false
         }
     }
 
+    var supportsBatch: Bool {
+        switch self {
+        case .dashScope, .assemblyAI, .openAIWhisper, .openRouter: return true
+        case .deepgram, .soniox: return false
+        }
+    }
+
+    /// The preferred mode if this provider supports it, otherwise the one it does.
+    func effectiveMode(_ preferred: RecognitionMode) -> RecognitionMode {
+        switch preferred {
+        case .realtime: return supportsRealtime ? .realtime : .batch
+        case .batch: return supportsBatch ? .batch : .realtime
+        }
+    }
+
     /// Rough list price in CNY per audio second, for the usage estimate only.
     /// USD prices converted at ≈7.1.
-    var estimatedYuanPerSecond: Double {
+    func estimatedYuanPerSecond(_ mode: RecognitionMode) -> Double {
+        switch (self, mode) {
+        case (.dashScope, .batch): return 0.00022                  // qwen3-asr-flash
+        case (.assemblyAI, .batch): return (0.21 + 0.05) * 7.1 / 3600  // Universal-3.5 Pro + keyterms
+        default: break
+        }
         switch self {
         case .dashScope: return 0.00033            // ¥0.00033/s
         case .deepgram: return 0.0077 * 7.1 / 60   // $0.0077/min streaming
@@ -92,7 +126,12 @@ enum ASRProviderType: String, CaseIterable {
     }
 
     /// `hints` are used by providers that support them (DashScope, Soniox); others ignore them.
-    func makeSession(apiKey: String, hints: RecognitionHints = .none) -> ASRSession {
+    func makeSession(apiKey: String, hints: RecognitionHints = .none, mode: RecognitionMode = .realtime) -> ASRSession {
+        switch (self, effectiveMode(mode)) {
+        case (.dashScope, .batch): return QwenBatchASR(apiKey: apiKey, hints: hints)
+        case (.assemblyAI, .batch): return AssemblyAIBatchASR(apiKey: apiKey, hints: hints)
+        default: break
+        }
         switch self {
         case .dashScope: return DashScopeASR(apiKey: apiKey, model: SettingsManager.shared.getDashScopeASRModel(),
                                              hints: hints)
@@ -212,10 +251,15 @@ class BufferedASRSession: ASRSession {
 
         let task = upload(pcm: audio) { [weak self] result in
             DispatchQueue.main.async {
-                guard let self = self, !self.isCancelledSnapshot else { return }
+                guard let self = self, !self.isCancelledNow else { return }
                 completion(result)
             }
         }
+        if let task = task { track(task) }
+    }
+
+    /// Multi-step uploads register each request so `cancel()` stops whichever is running.
+    func track(_ task: URLSessionTask) {
         lock.lock()
         uploadTask = task
         lock.unlock()
@@ -230,7 +274,7 @@ class BufferedASRSession: ASRSession {
         task?.cancel()
     }
 
-    private var isCancelledSnapshot: Bool {
+    var isCancelledNow: Bool {
         lock.lock()
         defer { lock.unlock() }
         return isCancelled
