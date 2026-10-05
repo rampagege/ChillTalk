@@ -3395,6 +3395,40 @@
         }
       }
     },
+    "实时流式 · 约 $0.45/小时 · 新用户送 $50 · 服务在国外": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-time streaming · about $0.45/hour · $50 free for new users · hosted outside China"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リアルタイムストリーミング · 約 $0.45/時間 · 新規ユーザーは $50 分無料 · 海外のサービス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실시간 스트리밍 · 시간당 약 $0.45 · 신규 사용자 $50 무료 · 해외 서비스"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实时流式 · 约 $0.45/小时 · 新用户送 $50 · 服务在国外"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即時串流 · 約 $0.45/小時 · 新使用者送 $50 · 服務位於海外"
+          }
+        }
+      }
+    },
     "实时流式 · 约 ¥0.85/小时 · 服务在国外": {
       "localizations": {
         "en": {

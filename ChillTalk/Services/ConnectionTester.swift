@@ -15,7 +15,7 @@ enum ConnectionTester {
         guard !key.isEmpty else { return .failure(String(localized: "请先填写 API 密钥")) }
 
         switch provider {
-        case .dashScope, .deepgram:
+        case .dashScope, .deepgram, .assemblyAI:
             // Open a real session and stop as soon as the provider says it's ready.
             // DashScope only reports ready after accepting run-task, which also validates the model.
             guard let session = provider.makeSession(apiKey: key) as? WebSocketASRSession else {

@@ -49,6 +49,7 @@ enum ASRProviderType: String, CaseIterable {
     case openAIWhisper = "OpenAI Whisper"
     case openRouter = "OpenRouter（实验）"
     case soniox = "Soniox"
+    case assemblyAI = "AssemblyAI"
 
     var displayName: String {
         switch self {
@@ -62,7 +63,7 @@ enum ASRProviderType: String, CaseIterable {
     /// HUD falls back to Apple's on-device live captions.
     var streamsPartials: Bool {
         switch self {
-        case .dashScope, .deepgram, .soniox: return true
+        case .dashScope, .deepgram, .soniox, .assemblyAI: return true
         case .openAIWhisper, .openRouter: return false
         }
     }
@@ -75,6 +76,7 @@ enum ASRProviderType: String, CaseIterable {
         case .deepgram: return 0.0077 * 7.1 / 60   // $0.0077/min streaming
         case .openAIWhisper, .openRouter: return 0.006 * 7.1 / 60  // $0.006/min
         case .soniox: return 0.12 * 7.1 / 3600      // $0.12/h real-time
+        case .assemblyAI: return 0.45 * 7.1 / 3600  // $0.45/h Universal-3.6 Pro real-time
         }
     }
 
@@ -85,6 +87,7 @@ enum ASRProviderType: String, CaseIterable {
         case .openAIWhisper: return "OpenAI"
         case .openRouter: return "OpenRouter"
         case .soniox: return "Soniox"
+        case .assemblyAI: return "AssemblyAI"
         }
     }
 
@@ -97,6 +100,7 @@ enum ASRProviderType: String, CaseIterable {
         case .openAIWhisper: return OpenAICompatibleASR.openAIWhisper(apiKey: apiKey, language: hints.singleLanguage)
         case .openRouter: return OpenAICompatibleASR.openRouter(apiKey: apiKey, language: hints.singleLanguage)
         case .soniox: return SonioxASR(apiKey: apiKey, hints: hints)
+        case .assemblyAI: return AssemblyAIASR(apiKey: apiKey, hints: hints)
         }
     }
 }

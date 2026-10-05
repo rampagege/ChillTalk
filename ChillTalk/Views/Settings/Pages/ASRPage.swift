@@ -108,6 +108,7 @@ struct ASRPage: View {
         case .openAIWhisper: return "openAIKey"
         case .openRouter: return "openRouterKey"
         case .soniox: return "sonioxKey"
+        case .assemblyAI: return "assemblyAIKey"
         }
     }
 
@@ -117,6 +118,7 @@ struct ASRPage: View {
         case .deepgram: return "Deepgram API Key"
         case .openRouter: return "sk-or-v1-..."
         case .soniox: return "Soniox API Key"
+        case .assemblyAI: return "AssemblyAI API Key"
         }
     }
 
@@ -135,6 +137,7 @@ struct ASRPage: View {
         case .openAIWhisper: return URL(string: "https://platform.openai.com/api-keys")!
         case .openRouter: return URL(string: "https://openrouter.ai/keys")!
         case .soniox: return URL(string: "https://console.soniox.com/")!
+        case .assemblyAI: return URL(string: "https://www.assemblyai.com/dashboard")!
         }
     }
 
@@ -145,6 +148,7 @@ struct ASRPage: View {
         case .openAIWhisper: return String(localized: "说完后整段上传")
         case .openRouter: return String(localized: "实验性 · 说完后整段上传")
         case .soniox: return String(localized: "实时流式 · 约 ¥0.85/小时 · 服务在国外")
+        case .assemblyAI: return String(localized: "实时流式 · 约 $0.45/小时 · 新用户送 $50 · 服务在国外")
         }
     }
 
@@ -153,7 +157,7 @@ struct ASRPage: View {
         case .dashScope: return String(localized: "会建立一次识别任务并立即结束，不上传音频")
         case .deepgram: return String(localized: "会建立一次连接并立即断开")
         case .openAIWhisper, .openRouter: return String(localized: "验证密钥是否有效")
-        case .soniox: return String(localized: "会建立一次连接并立即结束，不上传音频")
+        case .soniox, .assemblyAI: return String(localized: "会建立一次连接并立即结束，不上传音频")
         }
     }
 }

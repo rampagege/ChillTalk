@@ -33,6 +33,9 @@ final class SettingsModel: ObservableObject {
     @Published var sonioxKey: String {
         didSet { saveLater("sonioxKey") { [settings, sonioxKey] in settings.setSonioxAPIKey(Self.clean(sonioxKey)) } }
     }
+    @Published var assemblyAIKey: String {
+        didSet { saveLater("assemblyAIKey") { [settings, assemblyAIKey] in settings.setAssemblyAIAPIKey(Self.clean(assemblyAIKey)) } }
+    }
     @Published var openRouterKey: String {
         didSet { saveLater("openRouterKey") { [settings, openRouterKey] in settings.setOpenRouterAPIKey(Self.clean(openRouterKey)) } }
     }
@@ -103,6 +106,7 @@ final class SettingsModel: ObservableObject {
         openAIKey = settings.getOpenAIAPIKey()
         openRouterKey = settings.getOpenRouterAPIKey()
         sonioxKey = settings.getSonioxAPIKey()
+        assemblyAIKey = settings.getAssemblyAIAPIKey()
         polishEnabled = settings.isPolishEnabled()
         polishProvider = settings.getPolishProvider()
         dashScopePolishModel = settings.getDashScopePolishModel()
@@ -129,6 +133,7 @@ final class SettingsModel: ObservableObject {
         case .openAIWhisper: return \.openAIKey
         case .openRouter: return \.openRouterKey
         case .soniox: return \.sonioxKey
+        case .assemblyAI: return \.assemblyAIKey
         }
     }
 

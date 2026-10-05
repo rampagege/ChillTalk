@@ -230,6 +230,7 @@ class SettingsManager {
         static let openAIAPIKey = "openAIAPIKey"
         static let openRouterAPIKey = "openRouterAPIKey"
         static let sonioxAPIKey = "sonioxAPIKey"
+        static let assemblyAIAPIKey = "assemblyAIAPIKey"
     }
     
     private init() {}
@@ -263,6 +264,8 @@ class SettingsManager {
             return getKeychainValue(key: KeychainKeys.openRouterAPIKey) ?? ""
         case .soniox:
             return getSonioxAPIKey()
+        case .assemblyAI:
+            return getAssemblyAIAPIKey()
         }
     }
     
@@ -272,6 +275,14 @@ class SettingsManager {
     
     func setSonioxAPIKey(_ key: String) {
         setKeychainValue(key: KeychainKeys.sonioxAPIKey, value: key)
+    }
+    
+    func getAssemblyAIAPIKey() -> String {
+        return getKeychainValue(key: KeychainKeys.assemblyAIAPIKey) ?? ""
+    }
+    
+    func setAssemblyAIAPIKey(_ key: String) {
+        setKeychainValue(key: KeychainKeys.assemblyAIAPIKey, value: key)
     }
     
     func getDashScopeAPIKey() -> String {

@@ -45,6 +45,7 @@
 		AA03A3 /* SyncPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA03A2 /* SyncPage.swift */; };
 		AA03C1 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA03C0 /* Localizable.xcstrings */; };
 		AA03C3 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA03C2 /* InfoPlist.xcstrings */; };
+		AA0401 /* AssemblyAIASR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0400 /* AssemblyAIASR.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -88,6 +89,7 @@
 		AA03C2 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		AAFF00 /* ChillTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChillTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAFF01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA0400 /* AssemblyAIASR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssemblyAIASR.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -217,6 +219,7 @@
 		AAFF40 /* ASR */ = {
 			isa = PBXGroup;
 			children = (
+				AA0400 /* AssemblyAIASR.swift */,
 				AA0300 /* SonioxASR.swift */,
 				AA0010 /* ASRProvider.swift */,
 				AA0012 /* DashScopeASR.swift */,
@@ -309,6 +312,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0401 /* AssemblyAIASR.swift in Sources */,
 				AA0001 /* ChillTalkApp.swift in Sources */,
 				AA0003 /* AppState.swift in Sources */,
 				AA0005 /* AudioCapture.swift in Sources */,

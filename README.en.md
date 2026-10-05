@@ -33,6 +33,7 @@ For Chinese, a pay-as-you-go key from the [Qwen AI Platform](https://www.qianwen
 |---|---|---|
 | Qwen / Alibaba Cloud Model Studio | CN¥1.2/hour | Recommended for Chinese |
 | Soniox | $0.12/hour | Good with mixed Chinese/English |
+| AssemblyAI | $0.45/hour | $50 free for new users; mixed Chinese/English |
 | Deepgram | $0.46/hour | |
 | OpenAI / OpenRouter | $0.36/hour | Uploads after you finish; weaker on Chinese |
 
