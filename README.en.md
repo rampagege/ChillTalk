@@ -9,6 +9,7 @@ Built for **domain terminology**: a personal vocabulary, learning from your corr
 ## Features
 
 - Global hotkey (Right ⌥ by default), Esc to cancel; choose real-time (text as you speak) or after-you-finish (cheaper, usually more accurate)
+- Six recognition providers: Qwen / Alibaba Cloud Model Studio, AssemblyAI, Deepgram, Soniox, OpenAI, OpenRouter; pick the Qwen model per mode
 - LLM polish: removes filler words, adds punctuation, resolves self-corrections, keeps your meaning
 - Vocabulary: hot words, key terms, background context, automatic replacement of misheard spellings, sound-alike correction, industry packs
 - Correct a mistake in History and it becomes a rule
@@ -17,7 +18,7 @@ Built for **domain terminology**: a personal vocabulary, learning from your corr
 
 ## Install
 
-Download the latest build from [Releases](https://github.com/rampagege/ChillTalk/releases), unzip it and move ChillTalk.app to Applications. Requires macOS 14+.
+Download the latest `.dmg` from [Releases](https://github.com/rampagege/ChillTalk/releases), open it and drag ChillTalk onto the Applications folder. Requires macOS 14+.
 
 This build is not notarized: on first launch, go to System Settings → Privacy & Security and click **Open Anyway**.
 
@@ -27,23 +28,21 @@ This build is not notarized: on first launch, go to System Settings → Privacy 
 2. Menu bar icon → Settings… → Speech recognition: pick a provider, enter its API key, click **Test connection**
 3. In any text field, tap Right ⌥, speak, tap it again
 
-For Chinese, a pay-as-you-go key from the [Qwen AI Platform](https://www.qianwenai.com/) (Alibaba Cloud Model Studio) covers both recognition and polish, with a 90-day free quota for new users — about CN¥10/month at 30 minutes of dictation a day.
+For Chinese, a pay-as-you-go key from the [Qwen AI Platform](https://www.qianwenai.com/) (Alibaba Cloud Model Studio) covers both recognition and polish — about CN¥10/month at 30 minutes of dictation a day, and the new-user quota lasts for months.
 
-| Recognition | Price (approx.) | Notes |
-|---|---|---|
-| Qwen / Alibaba Cloud Model Studio | CN¥0.5/hour real-time, CN¥0.1/hour after you finish | Recommended for Chinese |
-| Soniox | $0.12/hour | Good with mixed Chinese/English |
-| AssemblyAI | $0.45/hour | $50 free for new users; mixed Chinese/English |
-| Deepgram | $0.46/hour | |
-| OpenAI / OpenRouter | $0.36/hour | Uploads after you finish; weaker on Chinese |
+| Recognition | Price (approx.) | Free for new users | Notes |
+|---|---|---|---|
+| Qwen / Alibaba Cloud Model Studio | Real-time CN¥0.5/hour<br>After you finish CN¥0.1/hour | For 90 days, **per model**: 10 hours for per-second models, 1M tokens (≈12 hours) for the 3.1 series; Beijing region only | Recommended for Chinese; the same key works for polish |
+| AssemblyAI | Real-time $0.45/hour<br>After you finish $0.21/hour | $50, no expiry, no card | Hosted in the US |
+| Deepgram | $0.46/hour | $200, no expiry, no card | Real-time only; Chinese as Mandarin |
+| Soniox | $0.12/hour | None (ended Oct 2025) | Real-time only; good with mixed Chinese/English |
+| OpenAI / OpenRouter | ≈$0.36/hour | None | After you finish only; weaker on Chinese |
+
+Prices and free quotas as of October 2026; check each provider's site. Remaining quota is shown in each provider's console.
 
 ## Privacy
 
 Audio goes only to the recognition provider you choose; ChillTalk doesn't keep recordings. API keys live in the macOS Keychain and are never synced or uploaded. History and vocabulary stay on your Mac, with a copy in your iCloud Drive if you turn on sync.
-
-## Development
-
-Native Swift/SwiftUI, no third-party dependencies. Open `ChillTalk.xcodeproj` in Xcode 15+, set Signing to your own Team (a free Personal Team works; a stable signature lets macOS remember permissions), then run `./scripts/install.sh` to build and install to Applications.
 
 ## License
 
