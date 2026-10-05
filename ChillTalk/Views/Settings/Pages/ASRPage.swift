@@ -2,6 +2,9 @@ import SwiftUI
 
 struct ASRPage: View {
     @EnvironmentObject private var model: SettingsModel
+    /// Set when the user picks "自定义…" while the saved model is still a listed one.
+    @State private var customModelChosen = false
+    private static let customTag = "__custom__"
 
     var body: some View {
         SettingsPageView(title: String(localized: "语音识别"), subtitle: String(localized: "把你说的话转成文字。录音时实时显示，说完即插入。")) {
@@ -80,12 +83,29 @@ struct ASRPage: View {
                         set: { model[keyPath: model.asrKeyBinding] = $0 }
                     ))
                 }
-                if model.asrProvider == .dashScope && effectiveMode == .realtime {
+                if model.asrProvider == .dashScope {
                     CardDivider()
-                    CardRow(label: String(localized: "识别模型"), detail: String(localized: "需为实时流式模型（名称含 streaming 或 realtime）"),
-                            savedKey: "dashScopeASRModel") {
-                        BrandTextField(placeholder: SettingsManager.defaultDashScopeASRModel,
-                                       text: $model.dashScopeASRModel)
+                    CardRow(label: String(localized: "识别模型"), detail: dashScopeModelDetail, savedKey: dashScopeModelKey) {
+                        Picker("", selection: dashScopeModelSelection) {
+                            ForEach(DashScopeASRModel.catalog(effectiveMode)) { option in
+                                Text(verbatim: "\(option.id) · \(option.note)").tag(option.id)
+                            }
+                            Divider()
+                            Text("自定义…").tag(Self.customTag)
+                        }
+                        .labelsHidden()
+                        .pickerStyle(.menu)
+                        .frame(width: 260)
+                        .onChange(of: effectiveMode) { customModelChosen = false }
+                    }
+                    if isCustomDashScopeModel {
+                        CardDivider()
+                        CardRow(label: String(localized: "模型名称"),
+                                detail: effectiveMode == .realtime
+                                    ? String(localized: "需为实时流式模型（名称含 streaming 或 realtime）")
+                                    : String(localized: "需支持整段音频识别（如 qwen3-asr-flash）")) {
+                            BrandTextField(placeholder: dashScopeModelDefault, text: dashScopeModelText)
+                        }
                     }
                 }
                 CardDivider()
@@ -108,9 +128,11 @@ struct ASRPage: View {
                 TestConnectionRow(detail: testDetail) {
                     model.flushPendingSaves()
                     return await ConnectionTester.testASR(provider: model.asrProvider,
-                                                          apiKey: model[keyPath: model.asrKeyBinding])
+                                                          apiKey: model[keyPath: model.asrKeyBinding],
+                                                          mode: effectiveMode)
                 }
-                .id(model.asrProvider)  // reset the result when switching provider
+                // Reset the result when switching provider, mode or model.
+                .id("\(model.asrProvider.rawValue)|\(effectiveMode.rawValue)|\(dashScopeModelText.wrappedValue)")
             }
         }
     }
@@ -177,14 +199,61 @@ struct ASRPage: View {
         model.asrProvider.effectiveMode(model.recognitionMode)
     }
 
+    // MARK: Qwen / Model Studio model
+
+    /// The saved model for the mode in use (real-time and batch are remembered separately).
+    private var dashScopeModelText: Binding<String> {
+        effectiveMode == .realtime ? $model.dashScopeASRModel : $model.dashScopeBatchModel
+    }
+
+    private var dashScopeModelKey: String {
+        effectiveMode == .realtime ? "dashScopeASRModel" : "dashScopeBatchASRModel"
+    }
+
+    private var dashScopeModelDefault: String {
+        effectiveMode == .realtime ? SettingsManager.defaultDashScopeASRModel : SettingsManager.defaultDashScopeBatchModel
+    }
+
+    private var currentDashScopeModelID: String {
+        let id = dashScopeModelText.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        return id.isEmpty ? dashScopeModelDefault : id
+    }
+
+    private var isCustomDashScopeModel: Bool {
+        customModelChosen || !DashScopeASRModel.catalog(effectiveMode).contains { $0.id == currentDashScopeModelID }
+    }
+
+    private var dashScopeModelSelection: Binding<String> {
+        Binding(
+            get: { isCustomDashScopeModel ? Self.customTag : currentDashScopeModelID },
+            set: { tag in
+                if tag == Self.customTag {
+                    customModelChosen = true
+                } else {
+                    customModelChosen = false
+                    dashScopeModelText.wrappedValue = tag
+                }
+            }
+        )
+    }
+
+    private var dashScopeModelDetail: String {
+        let price = DashScopeASRModel.yuanPerSecond(currentDashScopeModelID, mode: effectiveMode) * 3600
+        let priceText = String(localized: "约 ¥\(String(format: "%.1f", price))/小时")
+        if isCustomDashScopeModel && DashScopeASRModel.find(currentDashScopeModelID) == nil {
+            return String(localized: "自定义模型，费用按默认模型估算：\(priceText)")
+        }
+        return priceText
+    }
+
     private var providerNote: String {
         switch (model.asrProvider, effectiveMode) {
-        case (.dashScope, .batch): return String(localized: "说完再识别 · qwen3-asr-flash · 约 ¥0.8/小时")
+        case (.dashScope, .batch): return String(localized: "说完再识别 · 最长 5 分钟")
         case (.assemblyAI, .batch): return String(localized: "说完再识别 · 约 $0.26/小时 · 新用户送 $50 · 服务在国外")
         default: break
         }
         switch model.asrProvider {
-        case .dashScope: return String(localized: "实时流式 · 约 ¥1.2/小时")
+        case .dashScope: return String(localized: "实时流式")
         case .deepgram: return String(localized: "实时流式 · 普通话（zh-CN）")
         case .openAIWhisper: return String(localized: "说完后整段上传")
         case .openRouter: return String(localized: "实验性 · 说完后整段上传")

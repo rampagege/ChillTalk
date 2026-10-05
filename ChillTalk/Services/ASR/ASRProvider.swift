@@ -101,12 +101,14 @@ enum ASRProviderType: String, CaseIterable {
     /// USD prices converted at ≈7.1.
     func estimatedYuanPerSecond(_ mode: RecognitionMode) -> Double {
         switch (self, mode) {
-        case (.dashScope, .batch): return 0.00022                  // qwen3-asr-flash
+        case (.dashScope, .batch):
+            return DashScopeASRModel.yuanPerSecond(SettingsManager.shared.getDashScopeBatchModel(), mode: .batch)
         case (.assemblyAI, .batch): return (0.21 + 0.05) * 7.1 / 3600  // Universal-3.5 Pro + keyterms
         default: break
         }
         switch self {
-        case .dashScope: return 0.00033            // ¥0.00033/s
+        case .dashScope:
+            return DashScopeASRModel.yuanPerSecond(SettingsManager.shared.getDashScopeASRModel(), mode: .realtime)
         case .deepgram: return 0.0077 * 7.1 / 60   // $0.0077/min streaming
         case .openAIWhisper, .openRouter: return 0.006 * 7.1 / 60  // $0.006/min
         case .soniox: return 0.12 * 7.1 / 3600      // $0.12/h real-time
@@ -128,7 +130,8 @@ enum ASRProviderType: String, CaseIterable {
     /// `hints` are used by providers that support them (DashScope, Soniox); others ignore them.
     func makeSession(apiKey: String, hints: RecognitionHints = .none, mode: RecognitionMode = .realtime) -> ASRSession {
         switch (self, effectiveMode(mode)) {
-        case (.dashScope, .batch): return QwenBatchASR(apiKey: apiKey, hints: hints)
+        case (.dashScope, .batch): return QwenBatchASR(apiKey: apiKey, model: SettingsManager.shared.getDashScopeBatchModel(),
+                                                       hints: hints)
         case (.assemblyAI, .batch): return AssemblyAIBatchASR(apiKey: apiKey, hints: hints)
         default: break
         }

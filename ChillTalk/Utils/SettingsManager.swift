@@ -213,6 +213,7 @@ class SettingsManager {
         static let openRouterModel = "openRouterModel"
         static let dashScopePolishModel = "dashScopePolishModel"
         static let dashScopeASRModel = "dashScopeASRModel"
+        static let dashScopeBatchModel = "dashScopeBatchASRModel"
         static let trailingPeriod = "trailingPeriod"
         static let recognitionContext = "recognitionContext"
         static let phoneticCorrection = "phoneticCorrection"
@@ -344,6 +345,17 @@ class SettingsManager {
     
     func setDashScopeASRModel(_ model: String) {
         defaults.set(model, forKey: Keys.dashScopeASRModel)
+    }
+
+    static let defaultDashScopeBatchModel = "qwen3-asr-flash"
+
+    /// Model for "说完再识别"; the streaming model above is used in real-time mode.
+    func getDashScopeBatchModel() -> String {
+        return nonEmpty(defaults.string(forKey: Keys.dashScopeBatchModel)) ?? Self.defaultDashScopeBatchModel
+    }
+
+    func setDashScopeBatchModel(_ model: String) {
+        defaults.set(model, forKey: Keys.dashScopeBatchModel)
     }
     
     // MARK: - Recognition context

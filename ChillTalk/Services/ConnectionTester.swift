@@ -10,9 +10,34 @@ enum ConnectionTestResult: Equatable {
 enum ConnectionTester {
     static let timeout: TimeInterval = 10
 
-    static func testASR(provider: ASRProviderType, apiKey: String) async -> ConnectionTestResult {
+    static func testASR(provider: ASRProviderType, apiKey: String,
+                        mode: RecognitionMode = .realtime) async -> ConnectionTestResult {
         let key = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !key.isEmpty else { return .failure(String(localized: "请先填写 API 密钥")) }
+
+        if provider == .dashScope && provider.effectiveMode(mode) == .batch {
+            // Recognize half a second of silence: checks the key and the chosen model.
+            let session = provider.makeSession(apiKey: key, mode: .batch)
+            return await measure { finish in
+                session.onError = { finish(.failure($0.localizedDescription)) }
+                session.start()
+                session.append(Data(count: 16000))
+                session.finish { result in
+                    switch result {
+                    case .success:
+                        finish(.success(latencyMs: 0))
+                    case .failure(let error):
+                        if case ASRError.noTranscript = error {
+                            finish(.success(latencyMs: 0))
+                        } else {
+                            finish(.failure(error.localizedDescription))
+                        }
+                    }
+                }
+            } cleanup: {
+                session.cancel()
+            }
+        }
 
         switch provider {
         case .dashScope, .deepgram, .assemblyAI:

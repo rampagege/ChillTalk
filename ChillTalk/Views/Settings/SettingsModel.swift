@@ -24,6 +24,9 @@ final class SettingsModel: ObservableObject {
     @Published var dashScopeASRModel: String {
         didSet { saveLater("dashScopeASRModel") { [settings, dashScopeASRModel] in settings.setDashScopeASRModel(Self.clean(dashScopeASRModel)) } }
     }
+    @Published var dashScopeBatchModel: String {
+        didSet { saveLater("dashScopeBatchASRModel") { [settings, dashScopeBatchModel] in settings.setDashScopeBatchModel(Self.clean(dashScopeBatchModel)) } }
+    }
     @Published var deepgramKey: String {
         didSet { saveLater("deepgramKey") { [settings, deepgramKey] in settings.setDeepgramAPIKey(Self.clean(deepgramKey)) } }
     }
@@ -105,6 +108,7 @@ final class SettingsModel: ObservableObject {
         asrProvider = settings.getASRProvider()
         dashScopeKey = settings.getDashScopeAPIKey()
         dashScopeASRModel = settings.getDashScopeASRModel()
+        dashScopeBatchModel = settings.getDashScopeBatchModel()
         deepgramKey = settings.getDeepgramAPIKey()
         openAIKey = settings.getOpenAIAPIKey()
         openRouterKey = settings.getOpenRouterAPIKey()
@@ -161,6 +165,7 @@ final class SettingsModel: ObservableObject {
         defer { isReloading = false }
         if asrProvider != settings.getASRProvider() { asrProvider = settings.getASRProvider() }
         if dashScopeASRModel != settings.getDashScopeASRModel() { dashScopeASRModel = settings.getDashScopeASRModel() }
+        if dashScopeBatchModel != settings.getDashScopeBatchModel() { dashScopeBatchModel = settings.getDashScopeBatchModel() }
         if polishEnabled != settings.isPolishEnabled() { polishEnabled = settings.isPolishEnabled() }
         if polishProvider != settings.getPolishProvider() { polishProvider = settings.getPolishProvider() }
         if dashScopePolishModel != settings.getDashScopePolishModel() { dashScopePolishModel = settings.getDashScopePolishModel() }
