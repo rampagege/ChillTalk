@@ -32,7 +32,7 @@ For Chinese, a pay-as-you-go key from the [Qwen AI Platform](https://www.qianwen
 
 | Recognition | Price (approx.) | Free for new users | Notes |
 |---|---|---|---|
-| Qwen / Alibaba Cloud Model Studio | Real-time CN¥0.5/hour<br>After you finish CN¥0.1/hour | For 90 days, **per model**: 10 hours for per-second models, 1M tokens (≈12 hours) for the 3.1 series; Beijing region only | Recommended for Chinese; the same key works for polish |
+| Qwen / Alibaba Cloud Model Studio | Real-time CN¥0.5/hour<br>After you finish CN¥0.1/hour | For 90 days, **per model**: 10 hours for per-second models, 1M tokens (≈12 hours) for the 3.1 series | Recommended for Chinese; the same key works for polish |
 | AssemblyAI | Real-time $0.45/hour<br>After you finish $0.21/hour | $50, no expiry, no card | Hosted in the US |
 | Deepgram | $0.46/hour | $200, no expiry, no card | Real-time only; Chinese as Mandarin |
 | Soniox | $0.12/hour | None (ended Oct 2025) | Real-time only; good with mixed Chinese/English |
