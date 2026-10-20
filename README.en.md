@@ -6,6 +6,12 @@ Voice dictation for the macOS menu bar. Tap a hotkey, speak, tap again — polis
 
 Built for **domain terminology**: a personal vocabulary, learning from your corrections, sound-alike fixes and industry word packs.
 
+## Why
+
+Typeless is great, but it's a monthly subscription with way more features than I'll ever touch. I just want to talk and have the words show up at my cursor. That's it.
+
+ChillTalk does just that. It calls the Qwen API directly (or AssemblyAI, Deepgram, Soniox, OpenAI or OpenRouter, your pick) and you pay for what you use. With Qwen, half an hour a day comes to about ¥10 a month, and the free quota for new accounts covers the first few months.
+
 ## Features
 
 - Global hotkey (Right ⌥ by default), Esc to cancel; choose real-time (text as you speak) or after-you-finish (cheaper, usually more accurate)
