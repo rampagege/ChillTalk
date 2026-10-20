@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HotkeyPage: View {
     @EnvironmentObject private var model: SettingsModel
+    @State private var hasCustomHUDPosition = SettingsManager.shared.hasCustomHUDPosition
 
     var body: some View {
         SettingsPageView(title: String(localized: "快捷键"), subtitle: String(localized: "全局可用，在任何应用里都能开始说话。")) {
@@ -37,6 +38,17 @@ struct HotkeyPage: View {
                 }
             }
 
+            Card(title: String(localized: "提示框")) {
+                CardRow(label: String(localized: "位置"),
+                        detail: String(localized: "录音时可以拖动提示框，每块屏幕分别记住拖到的位置")) {
+                    Button(String(localized: "恢复默认位置")) {
+                        SettingsManager.shared.resetHUDPositions()
+                        hasCustomHUDPosition = false
+                    }
+                    .disabled(!hasCustomHUDPosition)
+                }
+            }
+
             Card(title: String(localized: "提示")) {
                 TipRow(icon: "hand.tap", text: String(localized: "单个修饰键（如右 ⌥）需要单独轻按才会触发：按住它再按其他键（⌥ 输入特殊字符、⌘C 等）不会开始录音。"))
                 CardDivider()
@@ -45,6 +57,7 @@ struct HotkeyPage: View {
                 TipRow(icon: "arrow.uturn.backward", text: String(localized: "处理中再按快捷键不会开始新的录音，按 Esc 可以取消。"))
             }
         }
+        .onAppear { hasCustomHUDPosition = SettingsManager.shared.hasCustomHUDPosition }
     }
 }
 

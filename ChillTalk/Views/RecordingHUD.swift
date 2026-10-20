@@ -1,7 +1,8 @@
 import SwiftUI
 import AppKit
 
-/// Bottom-center floating HUD. All methods except the two high-frequency updaters must be
+/// Floating HUD on the screen being typed on, bottom center by default. The user can drag it
+/// while it's up; each screen remembers where it was dragged to. All methods except the two high-frequency updaters must be
 /// called on the main thread.
 class RecordingHUDController: ObservableObject {
     enum Mode {
@@ -11,12 +12,17 @@ class RecordingHUDController: ObservableObject {
     }
 
     /// The panel never resizes (a SwiftUI-driven resize anchors at the top-left and pushed
-    /// the HUD into the Dock on first show). The pill is drawn bottom-aligned inside it and
-    /// the rest of the panel is transparent and click-through.
+    /// the HUD into the Dock on first show). The pill is drawn at its bottom and the
+    /// rest of the panel is transparent, so clicks there fall through to the apps below.
     private static let panelSize = NSSize(width: 680, height: 180)
     private static let bottomMargin: CGFloat = 16
+    /// Space the pill can take inside the panel, including two lines of live text.
+    private static let pillZone = NSSize(width: 600, height: 110)
+    private static let shadowInset: CGFloat = 12
 
     private var window: NSWindow?
+    /// Set while the HUD positions itself, so only the user's drags are remembered.
+    private var isPositioning = false
     private var hideWorkItem: DispatchWorkItem?
     @Published var isVisible: Bool = false
     @Published var mode: Mode = .recording
@@ -91,13 +97,14 @@ class RecordingHUDController: ObservableObject {
         if window == nil {
             createWindow()
         }
-        positionOnActiveScreen()
+        // Keep the position while a dictation's HUD is already up.
+        if !isVisible { positionOnActiveScreen() }
         isVisible = true
         window?.orderFrontRegardless()
     }
 
     private func createWindow() {
-        let hostingView = NSHostingView(rootView: RecordingHUDView().environmentObject(self))
+        let hostingView = DraggableHostingView(rootView: RecordingHUDView().environmentObject(self))
         hostingView.frame = NSRect(origin: .zero, size: Self.panelSize)
         if #available(macOS 13.0, *) {
             hostingView.sizingOptions = []
@@ -114,22 +121,82 @@ class RecordingHUDController: ObservableObject {
         panel.backgroundColor = .clear
         panel.level = .floating
         panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
-        panel.isMovableByWindowBackground = false
         panel.hasShadow = false  // The pill draws its own shadow; a window shadow outlines the whole panel
-        panel.ignoresMouseEvents = true
+        // ignoresMouseEvents stays at its default: clicks on the pill drag it, clicks on the
+        // transparent rest pass through (setting it to false would capture those too). A
+        // non-activating panel never takes focus from the app being typed in.
+
+        // performDrag returns before the drag ends, so remember the position as it moves.
+        NotificationCenter.default.addObserver(forName: NSWindow.didMoveNotification, object: panel, queue: .main) { [weak self] _ in
+            guard let self, !self.isPositioning else { return }
+            self.saveDraggedPosition(panel.frame.origin)
+        }
 
         self.window = panel
     }
 
-    /// Bottom-center of the screen the mouse is on, just above the Dock.
-    private func positionOnActiveScreen() {
-        guard let window = window else { return }
+    /// Where the pill is drawn for a panel at `origin`.
+    private static func pillRect(origin: NSPoint) -> NSRect {
+        NSRect(x: origin.x + (panelSize.width - pillZone.width) / 2, y: origin.y + shadowInset,
+               width: pillZone.width, height: pillZone.height)
+    }
+
+    /// The screen being typed on: the one with the frontmost app's front window, else the
+    /// one with the mouse.
+    private static func activeScreen() -> NSScreen? {
+        if let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
+           let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]],
+           let front = windows.first(where: { ($0[kCGWindowOwnerPID as String] as? pid_t) == pid && ($0[kCGWindowLayer as String] as? Int) == 0 }),
+           let boundsDict = front[kCGWindowBounds as String] as? NSDictionary,
+           let bounds = CGRect(dictionaryRepresentation: boundsDict),
+           let primaryHeight = NSScreen.screens.first?.frame.maxY {
+            // Window bounds use a top-left origin on the primary screen.
+            let center = NSPoint(x: bounds.midX, y: primaryHeight - bounds.midY)
+            if let screen = NSScreen.screens.first(where: { NSMouseInRect(center, $0.frame, false) }) { return screen }
+        }
         let mouse = NSEvent.mouseLocation
-        let screen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) } ?? NSScreen.main
-        guard let visible = screen?.visibleFrame else { return }
-        let origin = NSPoint(x: (visible.midX - Self.panelSize.width / 2).rounded(),
+        return NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) } ?? NSScreen.main
+    }
+
+    /// The spot the user dragged it to on this screen, otherwise bottom center, just above the Dock.
+    private func positionOnActiveScreen() {
+        guard let window = window, let screen = Self.activeScreen() else { return }
+        let visible = screen.visibleFrame
+        let origin: NSPoint
+        if let id = screen.displayUUID, let saved = SettingsManager.shared.hudPosition(onScreen: id),
+           visible.intersects(Self.pillRect(origin: saved)) {
+            origin = saved
+        } else {
+            origin = NSPoint(x: (visible.midX - Self.panelSize.width / 2).rounded(),
                              y: (visible.minY + Self.bottomMargin).rounded())
+        }
+        isPositioning = true
         window.setFrame(NSRect(origin: origin, size: Self.panelSize), display: false)
+        isPositioning = false
+    }
+
+    /// Remembers a dragged position for the screen the pill ended up on.
+    private func saveDraggedPosition(_ origin: NSPoint) {
+        let pill = Self.pillRect(origin: origin)
+        let center = NSPoint(x: pill.midX, y: pill.midY)
+        guard let id = NSScreen.screens.first(where: { NSMouseInRect(center, $0.frame, false) })?.displayUUID else { return }
+        SettingsManager.shared.setHUDPosition(origin, onScreen: id)
+    }
+}
+
+private extension NSScreen {
+    /// Stable across reboots and reconnects, unlike the display number.
+    var displayUUID: String? {
+        guard let number = deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber,
+              let uuid = CGDisplayCreateUUIDFromDisplayID(number.uint32Value)?.takeRetainedValue() else { return nil }
+        return CFUUIDCreateString(nil, uuid) as String
+    }
+}
+
+/// Dragging the pill moves the HUD panel.
+private final class DraggableHostingView<Content: View>: NSHostingView<Content> {
+    override func mouseDown(with event: NSEvent) {
+        window?.performDrag(with: event)
     }
 }
 

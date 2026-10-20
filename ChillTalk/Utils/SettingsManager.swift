@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Security
 import Carbon
@@ -215,6 +216,7 @@ class SettingsManager {
         static let dashScopeASRModel = "dashScopeASRModel"
         static let dashScopeBatchModel = "dashScopeBatchASRModel"
         static let trailingPeriod = "trailingPeriod"
+        static let hudPosition = "hudPosition"
         static let recognitionContext = "recognitionContext"
         static let phoneticCorrection = "phoneticCorrection"
         static let dictationLanguage = "dictationLanguage"
@@ -442,6 +444,30 @@ class SettingsManager {
     
     func setKeepsTrailingPeriod(_ keep: Bool) {
         defaults.set(keep, forKey: Keys.trailingPeriod)
+    }
+
+    // MARK: - Recording HUD
+
+    /// Where the user last dragged the HUD on each screen (the panel's origin, keyed by the
+    /// display's UUID). Kept per Mac, not synced.
+    func hudPosition(onScreen screenID: String) -> NSPoint? {
+        guard let saved = (defaults.dictionary(forKey: Keys.hudPosition) as? [String: [String: Double]])?[screenID],
+              let x = saved["x"], let y = saved["y"] else { return nil }
+        return NSPoint(x: x, y: y)
+    }
+
+    func setHUDPosition(_ origin: NSPoint, onScreen screenID: String) {
+        var all = defaults.dictionary(forKey: Keys.hudPosition) as? [String: [String: Double]] ?? [:]
+        all[screenID] = ["x": Double(origin.x), "y": Double(origin.y)]
+        defaults.set(all, forKey: Keys.hudPosition)
+    }
+
+    var hasCustomHUDPosition: Bool {
+        !(defaults.dictionary(forKey: Keys.hudPosition)?.isEmpty ?? true)
+    }
+
+    func resetHUDPositions() {
+        defaults.removeObject(forKey: Keys.hudPosition)
     }
     
     // MARK: - Polish Provider
