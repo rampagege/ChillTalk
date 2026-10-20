@@ -18,7 +18,9 @@ ChillTalk does just that. It calls the Qwen API directly (or AssemblyAI, Deepgra
 - Six recognition providers: Qwen / Alibaba Cloud Model Studio, AssemblyAI, Deepgram, Soniox, OpenAI, OpenRouter; pick the Qwen model per mode
 - LLM polish: removes filler words, adds punctuation, resolves self-corrections, keeps your meaning
 - Vocabulary: hot words, key terms, background context, automatic replacement of misheard spellings, sound-alike correction, industry packs
+- Correct the last dictation by voice: press a second hotkey and say "change Mike to Mark", or just say it again, and the text you just dictated is replaced; misheard words go into your vocabulary
 - Correct a mistake in History and save it as a rule in one click
+- Drag the recording HUD anywhere; each screen remembers its own spot
 - 6 dictation languages, 5 interface languages
 - History and usage stats, iCloud sync, optional voice enhancement (echo cancellation + noise suppression)
 
