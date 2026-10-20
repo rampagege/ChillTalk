@@ -10,7 +10,7 @@ Built for **domain terminology**: a personal vocabulary, learning from your corr
 
 Typeless is great, but it's a monthly subscription with way more features than I'll ever touch. I just want to talk and have the words show up at my cursor. That's it.
 
-ChillTalk does just that. It calls the Qwen API directly (or AssemblyAI, Deepgram, Soniox, OpenAI or OpenRouter, your pick) and you pay for what you use. With Qwen, half an hour a day comes to about ¥10 a month, and the free quota for new accounts covers the first few months.
+ChillTalk does just that. It calls the Qwen API directly (or AssemblyAI, Deepgram, Soniox, OpenAI or OpenRouter, your pick) and you pay for what you use. With Qwen, half an hour a day comes to about CN¥10 a month, and the free quota for new accounts covers the first few months.
 
 ## Features
 
@@ -18,7 +18,7 @@ ChillTalk does just that. It calls the Qwen API directly (or AssemblyAI, Deepgra
 - Six recognition providers: Qwen / Alibaba Cloud Model Studio, AssemblyAI, Deepgram, Soniox, OpenAI, OpenRouter; pick the Qwen model per mode
 - LLM polish: removes filler words, adds punctuation, resolves self-corrections, keeps your meaning
 - Vocabulary: hot words, key terms, background context, automatic replacement of misheard spellings, sound-alike correction, industry packs
-- Correct a mistake in History and it becomes a rule
+- Correct a mistake in History and save it as a rule in one click
 - 6 dictation languages, 5 interface languages
 - History and usage stats, iCloud sync, optional voice enhancement (echo cancellation + noise suppression)
 
@@ -34,7 +34,7 @@ This build is not notarized: on first launch, go to System Settings → Privacy 
 2. Menu bar icon → Settings… → Speech recognition: pick a provider, enter its API key, click **Test connection**
 3. In any text field, tap Right ⌥, speak, tap it again
 
-For Chinese, a pay-as-you-go key from the [Qwen AI Platform](https://www.qianwenai.com/) (Alibaba Cloud Model Studio) covers both recognition and polish — about CN¥10/month at 30 minutes of dictation a day, and the new-user quota lasts for months.
+For Chinese, one pay-as-you-go key from the [Qwen AI Platform](https://www.qianwenai.com/) (Alibaba Cloud Model Studio) covers both recognition and polish.
 
 | Recognition | Price (approx.) | Free for new users | Notes |
 |---|---|---|---|
@@ -48,7 +48,7 @@ Prices and free quotas as of October 2026; check each provider's site. Remaining
 
 ## Privacy
 
-Audio goes only to the recognition provider you choose; ChillTalk doesn't keep recordings. API keys live in the macOS Keychain and are never synced or uploaded. History and vocabulary stay on your Mac, with a copy in your iCloud Drive if you turn on sync.
+Audio goes only to the recognition provider you choose; ChillTalk doesn't keep recordings. With polish on, the recognized text goes to the polish provider you choose. API keys live in the macOS Keychain and are never synced or uploaded. History and vocabulary stay on your Mac, with a copy in your iCloud Drive if you turn on sync.
 
 ## License
 
