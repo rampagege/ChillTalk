@@ -38,6 +38,32 @@ struct HotkeyPage: View {
                 }
             }
 
+            Card(title: String(localized: "纠正上一句")) {
+                CardRow(label: String(localized: "快捷键"),
+                        detail: String(localized: "按下后说要怎么改，比如「把张三改成章山」，也可以把上一句重说一遍。使用「文字润色」的密钥。"),
+                        savedKey: "correctionHotkeyPreset") {
+                    Picker("", selection: $model.correctionHotkeyPreset) {
+                        Text("不使用").tag(HotkeyPreset?.none)
+                        ForEach(HotkeyPreset.allCases.filter { $0 != model.hotkeyPreset }, id: \.self) { preset in
+                            Text(preset.displayName).tag(HotkeyPreset?.some(preset))
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .frame(width: 260)
+                }
+                if let note = model.correctionHotkeyPreset?.conflictNote {
+                    CardDivider()
+                    Label(note, systemImage: "exclamationmark.triangle.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Brand.warning)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                }
+            }
+
             Card(title: String(localized: "提示框")) {
                 CardRow(label: String(localized: "位置"),
                         detail: String(localized: "录音时可以拖动提示框，每块屏幕分别记住拖到的位置")) {

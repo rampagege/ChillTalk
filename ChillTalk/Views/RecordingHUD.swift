@@ -29,6 +29,8 @@ class RecordingHUDController: ObservableObject {
     @Published var message: String = ""
     @Published var liveTranscript: String = ""
     @Published var audioLevel: Double = 0.0
+    /// The dictation is a spoken correction of the last insertion.
+    @Published var isCorrecting = false
 
     static let shared = RecordingHUDController()
 
@@ -277,9 +279,11 @@ struct RecordingHUDView: View {
     private var primaryText: String {
         switch controller.mode {
         case .recording:
-            return controller.liveTranscript.isEmpty ? String(localized: "请说话…") : Self.tail(controller.liveTranscript)
+            let placeholder = controller.isCorrecting ? String(localized: "说说上一句要怎么改…") : String(localized: "请说话…")
+            return controller.liveTranscript.isEmpty ? placeholder : Self.tail(controller.liveTranscript)
         case .processing:
-            return controller.liveTranscript.isEmpty ? String(localized: "处理中…") : Self.tail(controller.liveTranscript)
+            let placeholder = controller.isCorrecting ? String(localized: "正在修改上一句…") : String(localized: "处理中…")
+            return controller.liveTranscript.isEmpty ? placeholder : Self.tail(controller.liveTranscript)
         case .message:
             return controller.message
         }
@@ -287,8 +291,11 @@ struct RecordingHUDView: View {
 
     private var hintText: String? {
         switch controller.mode {
-        case .recording: return String(localized: "再按快捷键结束 · Esc 取消")
-        case .processing: return controller.liveTranscript.isEmpty ? nil : String(localized: "处理中… · Esc 取消")
+        case .recording:
+            return controller.isCorrecting ? String(localized: "纠正上一句 · 再按快捷键结束 · Esc 取消") : String(localized: "再按快捷键结束 · Esc 取消")
+        case .processing:
+            guard !controller.liveTranscript.isEmpty else { return nil }
+            return controller.isCorrecting ? String(localized: "正在修改上一句… · Esc 取消") : String(localized: "处理中… · Esc 取消")
         case .message: return nil
         }
     }

@@ -1,27 +1,36 @@
 import Carbon
 import Cocoa
 
-/// Global dictation hotkey.
+/// Global hotkeys: one starts dictation, an optional second one corrects the last insertion.
 ///
 /// - Modifier+key combos use a Carbon hotkey (consumes the keystroke, fires on press).
 /// - A single modifier (e.g. right Option) fires on *release*, and only if nothing else was
 ///   pressed while it was held. Using ⌥ to type special characters, or ⌘ in a shortcut,
 ///   therefore never toggles recording.
 ///
-/// Also reports Esc presses so the app can cancel an in-progress dictation.
+/// Also reports Esc presses so the app can cancel an in-progress dictation, and any typing or
+/// clicking in other apps so the app knows the last insertion may have been edited.
 final class HotkeyManager {
-    var onHotkeyPressed: (() -> Void)?
-    var onEscapePressed: (() -> Void)?
+    enum Action: UInt32 {
+        case dictate = 1
+        case correct = 2
+    }
 
-    // Carbon combo hotkey
+    var onHotkeyPressed: ((Action) -> Void)?
+    var onEscapePressed: (() -> Void)?
+    /// A key press or click that went to another app.
+    var onUserInput: (() -> Void)?
+
+    // Carbon combo hotkeys
     private var eventHandler: EventHandlerRef?
-    private var hotKeyRef: EventHotKeyRef?
-    private let hotkeyID = EventHotKeyID(signature: OSType(0x4348544B), id: 1) // 'CHTK'
+    private var hotKeyRefs: [Action: EventHotKeyRef] = [:]
+    private static let signature = OSType(0x4348544B) // 'CHTK'
 
     // Event monitors (modifier taps + Esc)
     private var monitors: [Any] = []
-    private var modifierKeyCode: Int?
-    private var isModifierHeld = false
+    /// Modifier keyCode → what tapping it does.
+    private var modifierActions: [Int: Action] = [:]
+    private var heldModifier: Int?
     private var isTapCandidate = false
 
     init() {
@@ -29,31 +38,36 @@ final class HotkeyManager {
     }
 
     deinit {
-        unregisterHotkey()
+        unregisterAll()
         monitors.forEach { NSEvent.removeMonitor($0) }
     }
 
     /// Returns false if the combo is already taken by another app or the system.
     @discardableResult
-    func registerHotkey(_ config: HotkeyConfig) -> Bool {
-        unregisterHotkey()
+    func register(_ config: HotkeyConfig, for action: Action) -> Bool {
+        unregister(action)
         if config.isModifierOnly {
-            modifierKeyCode = config.keyCode
-            print("✅ Registered modifier-tap hotkey: keyCode=\(config.keyCode)")
+            modifierActions[config.keyCode] = action
+            print("✅ Registered modifier-tap hotkey \(action): keyCode=\(config.keyCode)")
             return true
         }
-        return registerCombinationHotkey(keyCode: config.keyCode, modifiers: config.modifiers)
+        return registerCombinationHotkey(keyCode: config.keyCode, modifiers: config.modifiers, action: action)
     }
 
-    func unregisterHotkey() {
-        modifierKeyCode = nil
-        isModifierHeld = false
-        isTapCandidate = false
-
-        if let ref = hotKeyRef {
-            UnregisterEventHotKey(ref)
-            hotKeyRef = nil
+    func unregister(_ action: Action) {
+        modifierActions = modifierActions.filter { $0.value != action }
+        if let held = heldModifier, modifierActions[held] == nil {
+            heldModifier = nil
+            isTapCandidate = false
         }
+        if let ref = hotKeyRefs.removeValue(forKey: action) {
+            UnregisterEventHotKey(ref)
+        }
+    }
+
+    private func unregisterAll() {
+        unregister(.dictate)
+        unregister(.correct)
         if let handler = eventHandler {
             RemoveEventHandler(handler)
             eventHandler = nil
@@ -66,6 +80,7 @@ final class HotkeyManager {
         let mask: NSEvent.EventTypeMask = [.flagsChanged, .keyDown, .leftMouseDown, .rightMouseDown, .otherMouseDown]
         if let global = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: { [weak self] event in
             self?.handle(event)
+            if event.type != .flagsChanged { self?.onUserInput?() }
         }) {
             monitors.append(global)
         }
@@ -83,39 +98,40 @@ final class HotkeyManager {
         case .flagsChanged:
             handleFlagsChanged(event)
         case .keyDown:
-            if isModifierHeld { isTapCandidate = false }
+            if heldModifier != nil { isTapCandidate = false }
             if event.keyCode == UInt16(kVK_Escape), !event.isARepeat {
                 onEscapePressed?()
             }
         default:
             // Mouse click while holding the modifier (e.g. ⌥-click) is not a tap.
-            if isModifierHeld { isTapCandidate = false }
+            if heldModifier != nil { isTapCandidate = false }
         }
     }
 
     private func handleFlagsChanged(_ event: NSEvent) {
-        guard let target = modifierKeyCode, let deviceMask = Self.deviceMask(forKeyCode: target) else { return }
+        let keyCode = Int(event.keyCode)
 
-        guard Int(event.keyCode) == target else {
+        if let held = heldModifier, held != keyCode {
             // A different modifier changed while ours is held → it's a chord, not a tap.
-            if isModifierHeld { isTapCandidate = false }
+            isTapCandidate = false
             return
         }
+        guard let action = modifierActions[keyCode], let deviceMask = Self.deviceMask(forKeyCode: keyCode) else { return }
 
         // Device-dependent bits distinguish left/right, so releasing right ⌥ while left ⌥
         // is still held is detected correctly.
         let isDown = UInt(event.modifierFlags.rawValue) & deviceMask != 0
-        if isDown && !isModifierHeld {
-            isModifierHeld = true
+        if isDown && heldModifier == nil {
+            heldModifier = keyCode
             let others = event.modifierFlags
                 .intersection([.command, .option, .control, .shift])
-                .subtracting(Self.familyFlag(forKeyCode: target))
+                .subtracting(Self.familyFlag(forKeyCode: keyCode))
             isTapCandidate = others.isEmpty
-        } else if !isDown && isModifierHeld {
-            isModifierHeld = false
+        } else if !isDown && heldModifier == keyCode {
+            heldModifier = nil
             if isTapCandidate {
                 isTapCandidate = false
-                DispatchQueue.main.async { self.onHotkeyPressed?() }
+                DispatchQueue.main.async { self.onHotkeyPressed?(action) }
             }
         }
     }
@@ -147,7 +163,8 @@ final class HotkeyManager {
 
     // MARK: - Carbon combo hotkey
 
-    private func registerCombinationHotkey(keyCode: Int, modifiers: Int) -> Bool {
+    private func installHandlerIfNeeded() -> Bool {
+        guard eventHandler == nil else { return true }
         let handler: EventHandlerUPP = { _, theEvent, userData -> OSStatus in
             guard let userData = userData else { return OSStatus(eventNotHandledErr) }
             let manager = Unmanaged<HotkeyManager>.fromOpaque(userData).takeUnretainedValue()
@@ -155,9 +172,13 @@ final class HotkeyManager {
             var firedID = EventHotKeyID()
             GetEventParameter(theEvent, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID),
                               nil, MemoryLayout<EventHotKeyID>.size, nil, &firedID)
-            guard firedID.id == manager.hotkeyID.id else { return OSStatus(eventNotHandledErr) }
+            guard firedID.signature == HotkeyManager.signature,
+                  let action = Action(rawValue: firedID.id) else { return OSStatus(eventNotHandledErr) }
 
-            DispatchQueue.main.async { manager.onHotkeyPressed?() }
+            // The consumed keystroke never reaches the monitors: a held modifier (e.g. right ⌥
+            // of ⌥ Space) must not also count as a tap when it's released.
+            manager.isTapCandidate = false
+            DispatchQueue.main.async { manager.onHotkeyPressed?(action) }
             return noErr
         }
 
@@ -170,13 +191,20 @@ final class HotkeyManager {
             print("❌ Failed to install hotkey handler: \(installResult)")
             return false
         }
+        return true
+    }
 
+    private func registerCombinationHotkey(keyCode: Int, modifiers: Int, action: Action) -> Bool {
+        guard installHandlerIfNeeded() else { return false }
+
+        var ref: EventHotKeyRef?
         let registerResult = RegisterEventHotKey(
-            UInt32(keyCode), UInt32(modifiers), hotkeyID,
-            GetEventDispatcherTarget(), OptionBits(0), &hotKeyRef
+            UInt32(keyCode), UInt32(modifiers), EventHotKeyID(signature: Self.signature, id: action.rawValue),
+            GetEventDispatcherTarget(), OptionBits(0), &ref
         )
-        if registerResult == noErr {
-            print("✅ Registered combination hotkey: keyCode=\(keyCode), modifiers=\(modifiers)")
+        if registerResult == noErr, let ref {
+            hotKeyRefs[action] = ref
+            print("✅ Registered combination hotkey \(action): keyCode=\(keyCode), modifiers=\(modifiers)")
             return true
         }
         // Usually means another app (or the system, e.g. input source switching) owns it.

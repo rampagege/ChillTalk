@@ -24,6 +24,9 @@ struct VocabularyEntry: Codable, Identifiable, Equatable {
     var lastUsedAt: Date?
     /// Last user edit, for merging across Macs. Optional so older files decode.
     var updatedAt: Date?
+    /// Misheard spellings learned from spoken corrections that aren't trusted enough to
+    /// replace yet → times corrected. The term is already a hot word meanwhile.
+    var pendingMisrecognitions: [String: Int]? = nil
 
     var modifiedAt: Date { updatedAt ?? createdAt }
 }
@@ -122,9 +125,76 @@ final class VocabularyStore: ObservableObject {
         cleaned.term = entry.term.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.term.isEmpty else { return }
         cleaned.misrecognitions = Self.cleanMisrecognitions(entry.misrecognitions, term: cleaned.term)
+        // A spelling the user added by hand is trusted.
+        cleaned.pendingMisrecognitions = entry.pendingMisrecognitions?.filter { !cleaned.misrecognitions.contains($0.key) }
         cleaned.updatedAt = Date()
         entries[index] = cleaned
         save()
+    }
+
+    // MARK: - Learning from spoken corrections
+
+    enum LearnResult {
+        /// The term is a hot word; the misheard spelling isn't replaced (yet).
+        case hotword
+        /// From now on the misheard spelling is replaced with the term.
+        case autoReplace
+    }
+
+    /// How often the same mishearing must be corrected before it's replaced automatically.
+    static let correctionsToAutoReplace = 2
+
+    /// The user said `wrong` should have been `term`. The term becomes a hot word right away;
+    /// `wrong` is only replaced automatically once it was corrected
+    /// `correctionsToAutoReplace` times and `isInUse` is false (the user never kept it in
+    /// their own text, so it's not a word they really say). Returns the term as stored,
+    /// which keeps an existing entry's spelling.
+    func learnMisheard(_ wrong: String, as rawTerm: String, isInUse: Bool) -> (term: String, result: LearnResult)? {
+        let term = rawTerm.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !term.isEmpty, !wrong.isEmpty, wrong != term else { return nil }
+
+        var entry: VocabularyEntry
+        if let index = entries.firstIndex(where: { $0.term.caseInsensitiveCompare(term) == .orderedSame }) {
+            entry = entries.remove(at: index)
+        } else {
+            entry = VocabularyEntry(id: UUID(), term: term, misrecognitions: [], autoReplace: true, isKey: nil,
+                                    source: .correction, hitCount: 0, createdAt: Date(), lastUsedAt: nil, updatedAt: Date())
+        }
+        // Hot words are ranked by recent use.
+        entry.lastUsedAt = Date()
+        entry.updatedAt = Date()
+
+        if !entry.misrecognitions.contains(wrong) {
+            var pending = entry.pendingMisrecognitions ?? [:]
+            let count = (pending[wrong] ?? 0) + 1
+            if count >= Self.correctionsToAutoReplace && !isInUse {
+                entry.misrecognitions.append(wrong)
+                pending[wrong] = nil
+            } else {
+                pending[wrong] = count
+            }
+            entry.pendingMisrecognitions = pending.isEmpty ? nil : pending
+        }
+        entries.insert(entry, at: 0)
+        save()
+        let replaces = entry.autoReplace && entry.misrecognitions.contains(wrong)
+        return (entry.term, replaces ? .autoReplace : .hotword)
+    }
+
+    /// The user changed `term` back to `wrong`, so replacing `wrong` with `term` was a
+    /// mistake: stop doing it (the term stays a hot word). Returns the term if a rule was removed.
+    func forgetMisheard(_ wrong: String, replacedBy term: String) -> String? {
+        guard let index = entries.firstIndex(where: {
+            $0.term.caseInsensitiveCompare(term) == .orderedSame
+                && ($0.misrecognitions.contains(wrong) || $0.pendingMisrecognitions?[wrong] != nil)
+        }) else { return nil }
+        let wasReplacing = entries[index].misrecognitions.contains(wrong)
+        entries[index].misrecognitions.removeAll { $0 == wrong }
+        entries[index].pendingMisrecognitions?[wrong] = nil
+        if entries[index].pendingMisrecognitions?.isEmpty == true { entries[index].pendingMisrecognitions = nil }
+        entries[index].updatedAt = Date()
+        save()
+        return wasReplacing ? entries[index].term : nil
     }
 
     func delete(id: UUID) {
@@ -182,6 +252,9 @@ final class VocabularyStore: ObservableObject {
                 var keep = a.id.uuidString < b.id.uuidString ? a : b
                 let drop = keep.id == a.id ? b : a
                 keep.misrecognitions = Self.cleanMisrecognitions(a.misrecognitions + b.misrecognitions, term: keep.term)
+                let pending = (a.pendingMisrecognitions ?? [:]).merging(b.pendingMisrecognitions ?? [:], uniquingKeysWith: max)
+                    .filter { !keep.misrecognitions.contains($0.key) }
+                keep.pendingMisrecognitions = pending.isEmpty ? nil : pending
                 keep.hitCount = max(a.hitCount, b.hitCount)
                 keep.isKey = (a.isKey == true || b.isKey == true) ? true : nil
                 keep.updatedAt = max(a.modifiedAt, b.modifiedAt)

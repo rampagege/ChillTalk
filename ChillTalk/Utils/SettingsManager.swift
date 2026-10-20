@@ -225,6 +225,7 @@ class SettingsManager {
         static let recognitionMode = "recognitionMode"
         static let polishProvider = "polishProvider"
         static let hotkeyPreset = "hotkeyPreset"
+        static let correctionHotkeyPreset = "correctionHotkeyPreset"
         static let polishEnabled = "polishEnabled"
     }
     
@@ -518,6 +519,15 @@ class SettingsManager {
     
     func setHotkeyPreset(_ preset: HotkeyPreset) {
         defaults.set(preset.rawValue, forKey: Keys.hotkeyPreset)
+    }
+
+    /// Hotkey for correcting the last insertion; nil = off (the default).
+    func getCorrectionHotkeyPreset() -> HotkeyPreset? {
+        defaults.string(forKey: Keys.correctionHotkeyPreset).flatMap(HotkeyPreset.init(rawValue:))
+    }
+
+    func setCorrectionHotkeyPreset(_ preset: HotkeyPreset?) {
+        defaults.set(preset?.rawValue ?? "", forKey: Keys.correctionHotkeyPreset)
     }
     
     // MARK: - Polish Toggle

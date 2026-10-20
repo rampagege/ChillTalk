@@ -345,20 +345,30 @@ private struct VocabularyRow: View {
     @EnvironmentObject private var vocabulary: VocabularyStore
     @State private var isHovered = false
 
+    private var pending: [String] { (entry.pendingMisrecognitions ?? [:]).keys.sorted() }
+
     var body: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
                 Text(entry.term)
                     .font(.system(size: 13.5, weight: .semibold))
-                if entry.misrecognitions.isEmpty {
+                if entry.misrecognitions.isEmpty && pending.isEmpty {
                     Text("仅作为热词")
                         .font(.system(size: 11.5))
                         .foregroundStyle(.tertiary)
-                } else {
+                }
+                if !entry.misrecognitions.isEmpty {
                     Text(entry.misrecognitions.joined(separator: "、") + (entry.autoReplace ? String(localized: " → 自动替换") : String(localized: " · 不替换")))
                         .font(.system(size: 11.5))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                }
+                if !pending.isEmpty {
+                    Text(String(localized: "观察中：\(pending.joined(separator: "、"))，再纠正一次就自动替换"))
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                        .help(String(localized: "语音纠正时学到的写法。你没有在别处用过它，并且纠正满 \(VocabularyStore.correctionsToAutoReplace) 次，才会自动替换"))
                 }
             }
             Spacer(minLength: 12)

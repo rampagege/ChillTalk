@@ -76,18 +76,13 @@ final class HistoryStore: ObservableObject {
         usage = load([String: DailyUsage].self, from: usageURL) ?? [:]
     }
 
+    /// Returns the new record's ID, or nil when history is off.
+    @discardableResult
     func record(rawText: String, finalText: String, audioSeconds: Double, asrProvider: String,
-                polished: Bool, estimatedCostYuan: Double, date: Date = Date()) {
-        let key = dayKey(for: date)
-        var day = usage[key] ?? DailyUsage()
-        day.count += 1
-        day.characters += finalText.count
-        day.audioSeconds += audioSeconds
-        day.estimatedCostYuan += estimatedCostYuan
-        usage[key] = day
-        save(usage, to: usageURL)
+                polished: Bool, estimatedCostYuan: Double, date: Date = Date()) -> UUID? {
+        recordUsage(characters: finalText.count, audioSeconds: audioSeconds, estimatedCostYuan: estimatedCostYuan, date: date)
 
-        guard isHistoryEnabled else { return }
+        guard isHistoryEnabled else { return nil }
         let entry = DictationRecord(id: UUID(), date: date, rawText: rawText, finalText: finalText,
                                     audioSeconds: audioSeconds, asrProvider: asrProvider, polished: polished)
         records.insert(entry, at: 0)
@@ -95,6 +90,32 @@ final class HistoryStore: ObservableObject {
             records.removeLast(records.count - Self.maxRecords)
         }
         save(records, to: historyURL)
+        return entry.id
+    }
+
+    /// Whether `word` appears in text the user kept (inserted and not corrected away), other
+    /// than in record `excluding`. English words must match as whole words.
+    func keptTextContains(_ word: String, excluding id: UUID?) -> Bool {
+        let isLatin = word.unicodeScalars.allSatisfy { $0.isASCII }
+        let pattern = isLatin ? "\\b" + NSRegularExpression.escapedPattern(for: word) + "\\b" : NSRegularExpression.escapedPattern(for: word)
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: isLatin ? [.caseInsensitive] : []) else { return false }
+        return records.contains { record in
+            guard record.id != id else { return false }
+            let text = record.displayText
+            return regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) != nil
+        }
+    }
+
+    /// Counts a dictation in the usage statistics without adding a history record.
+    func recordUsage(characters: Int, audioSeconds: Double, estimatedCostYuan: Double, date: Date = Date()) {
+        let key = dayKey(for: date)
+        var day = usage[key] ?? DailyUsage()
+        day.count += 1
+        day.characters += characters
+        day.audioSeconds += audioSeconds
+        day.estimatedCostYuan += estimatedCostYuan
+        usage[key] = day
+        save(usage, to: usageURL)
     }
 
     func correct(id: UUID, text: String) {

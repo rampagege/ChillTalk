@@ -84,7 +84,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     private var currentAudioSeconds: TimeInterval = 0
     private var currentProvider: ASRProviderType = .dashScope
     private var currentMode: RecognitionMode = .realtime
+    /// The current dictation corrects the last insertion instead of inserting new text.
+    private var isCorrecting = false
     private var errorResetWork: DispatchWorkItem?
+
+    /// The most recent text this app typed, so the correction hotkey can replace it.
+    private struct LastInsertion {
+        var text: String
+        let target: TextInserter.Target
+        let time: Date
+        /// History record the text came from; corrections are saved onto it.
+        let historyID: UUID?
+        /// Nothing was typed or clicked in another app since, so the caret should still sit
+        /// right after the text.
+        var isUntouched = true
+    }
+    private var lastInsertion: LastInsertion?
 
     override init() {
         super.init()
@@ -113,11 +128,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         }
 
         hotkeyManager = HotkeyManager()
-        hotkeyManager.onHotkeyPressed = { [weak self] in
-            self?.handleHotkey()
+        hotkeyManager.onHotkeyPressed = { [weak self] action in
+            self?.handleHotkey(action)
         }
         hotkeyManager.onEscapePressed = { [weak self] in
             self?.handleEscape()
+        }
+        hotkeyManager.onUserInput = { [weak self] in
+            // The paste (and Backspaces) this app sends show up here too, shortly after.
+            guard let self, let last = self.lastInsertion, Date().timeIntervalSince(last.time) > 1 else { return }
+            self.lastInsertion?.isUntouched = false
         }
 
         PermissionManager.shared.checkAllPermissions()
@@ -159,9 +179,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     }
 
     private func registerHotkey() {
-        let preset = SettingsManager.shared.getHotkeyPreset()
-        if !hotkeyManager.registerHotkey(preset.config) {
+        let settings = SettingsManager.shared
+        let preset = settings.getHotkeyPreset()
+        if !hotkeyManager.register(preset.config, for: .dictate) {
             showError(String(localized: "快捷键 \(preset.displayName) 注册失败，可能已被其他应用占用，请在设置中换一个。"))
+        }
+        if let correction = settings.getCorrectionHotkeyPreset(), correction != preset {
+            if !hotkeyManager.register(correction.config, for: .correct) {
+                showError(String(localized: "快捷键 \(correction.displayName) 注册失败，可能已被其他应用占用，请在设置中换一个。"))
+            }
+        } else {
+            hotkeyManager.unregister(.correct)
         }
     }
 
@@ -182,10 +210,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
     // MARK: - Hotkey handling
 
-    private func handleHotkey() {
+    private func handleHotkey(_ action: HotkeyManager.Action) {
         switch appState.recordingState {
         case .idle, .error:
-            startRecording()
+            if action == .correct {
+                startCorrection()
+            } else {
+                startRecording(correcting: false)
+            }
         case .recording:
             stopRecording()
         case .processing:
@@ -207,7 +239,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
     // MARK: - Pipeline
 
-    private func startRecording() {
+    private func startCorrection() {
+        guard lastInsertion != nil else {
+            RecordingHUDController.shared.flash(String(localized: "还没有可以纠正的上一句"), isError: false)
+            return
+        }
+        let settings = SettingsManager.shared
+        guard !settings.getPolishAPIKey().isEmpty else {
+            showError(String(localized: "纠正上一句需要 \(settings.getPolishProvider().displayName) 密钥，请先在「文字润色」里配置"))
+            return
+        }
+        startRecording(correcting: true)
+    }
+
+    private func startRecording(correcting: Bool) {
         guard PermissionManager.shared.hasMicrophonePermission() else {
             PermissionManager.shared.checkMicrophonePermission()
             showError(String(localized: "需要麦克风权限"))
@@ -259,6 +304,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         }
 
         asrSession = session
+        isCorrecting = correcting
+        RecordingHUDController.shared.isCorrecting = correcting
         appState.recordingState = .recording
     }
 
@@ -295,7 +342,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
                 // misrecognitions before polish sees the text.
                 let scripted = SettingsManager.shared.getDictationLanguage().normalizeScript(transcript)
                 let fixed = MainActor.assumeIsolated { VocabularyStore.shared.applyReplacements(to: scripted) }
-                self.polishAndInsert(fixed, id: id)
+                if self.isCorrecting {
+                    self.correctLastInsertion(spoken: fixed, id: id)
+                } else {
+                    self.polishAndInsert(fixed, id: id)
+                }
             case .failure(let error):
                 self.showError(String(localized: "转录失败：\(error.localizedDescription)"))
             }
@@ -349,10 +400,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         guard dictationID == id else { return }
         let text = SettingsManager.shared.keepsTrailingPeriod() ? rawText : Self.removingTrailingPeriod(rawText)
         appState.lastTranscript = text
-        recordHistory(finalText: text, polishedWith: polishedWith)
+        let historyID = recordHistory(finalText: text, polishedWith: polishedWith)
 
         textInserter.insert(text, expectedPID: targetAppPID) { [weak self] result in
             guard let self = self, self.dictationID == id else { return }
+            if case .success(.pasted) = result, let target = self.textInserter.currentTarget() {
+                self.lastInsertion = LastInsertion(text: text, target: target, time: Date(), historyID: historyID)
+            } else {
+                // The text didn't land in a field (or it's unclear where): nothing to correct.
+                self.lastInsertion = nil
+            }
             switch result {
             case .success(.pasted):
                 self.appState.recordingState = .idle
@@ -371,6 +428,113 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         }
     }
 
+    /// Asks the LLM to apply what the user said to the last insertion, then swaps the old
+    /// text for the corrected one.
+    private func correctLastInsertion(spoken: String, id: UUID) {
+        guard let last = lastInsertion else {
+            showError(String(localized: "还没有可以纠正的上一句"))
+            return
+        }
+        let settings = SettingsManager.shared
+        let provider = settings.getPolishProvider()
+        let language = settings.getDictationLanguage()
+        let llm = LLMPolish(provider: provider, apiKey: settings.getPolishAPIKey(), model: settings.getPolishModel(), language: language)
+        let glossary = MainActor.assumeIsolated { VocabularyStore.shared.glossary() }
+
+        llm.correct(previous: last.text, spoken: spoken, glossary: glossary) { [weak self] result in
+            guard let self = self, self.dictationID == id else { return }
+            switch result {
+            case .success(let correction):
+                var text = language.normalizeScript(correction.text)
+                if !settings.keepsTrailingPeriod() { text = Self.removingTrailingPeriod(text) }
+                guard text != last.text else {
+                    self.appState.recordingState = .idle
+                    RecordingHUDController.shared.flash(String(localized: "没有需要修改的地方"), isError: false)
+                    return
+                }
+                let note = self.learnFromCorrection(correction.misheard, before: last.text, after: text,
+                                                    historyID: last.historyID, language: language)
+                self.replaceLastInsertion(last, with: text, id: id, polishedWith: provider, note: note)
+            case .failure(let error):
+                self.showError(String(localized: "纠正失败：\(error.localizedDescription)"))
+            }
+        }
+    }
+
+    private func replaceLastInsertion(_ last: LastInsertion, with text: String, id: UUID, polishedWith: PolishProvider,
+                                      note: String?) {
+        appState.lastTranscript = text
+        let cost = currentAudioSeconds * currentProvider.estimatedYuanPerSecond(currentMode)
+            + polishedWith.estimatedYuan(characters: currentRawText.count + last.text.count)
+        let seconds = currentAudioSeconds
+        MainActor.assumeIsolated {
+            // The corrected text replaces the original rather than adding to it.
+            HistoryStore.shared.recordUsage(characters: 0, audioSeconds: seconds, estimatedCostYuan: cost)
+            if let historyID = last.historyID { HistoryStore.shared.correct(id: historyID, text: text) }
+        }
+
+        textInserter.replace(last.text, with: text, in: last.target, allowBlindDelete: last.isUntouched) { [weak self] result in
+            guard let self = self, self.dictationID == id else { return }
+            switch result {
+            case .success(.replaced):
+                // A second correction edits the corrected text.
+                self.lastInsertion = LastInsertion(text: text, target: last.target, time: Date(), historyID: last.historyID)
+                self.appState.recordingState = .idle
+                if let note {
+                    RecordingHUDController.shared.flash(note, isError: false, duration: 3.5)
+                }
+            case .success(.copiedOnly):
+                self.lastInsertion = nil
+                self.appState.recordingState = .idle
+                RecordingHUDController.shared.flash(String(localized: "找不到上一句的位置，修改结果已复制到剪贴板"), isError: false)
+            case .failure(let error):
+                self.lastInsertion = nil
+                self.showError(String(localized: "\(error.localizedDescription)，结果已复制到剪贴板"))
+            }
+        }
+    }
+
+    /// Learns from a spoken correction and returns a note for the HUD, if any.
+    /// - Misheard words (per the LLM) become hot words, and are replaced automatically once
+    ///   corrected often enough and never used on purpose (see `VocabularyStore.learnMisheard`).
+    /// - A correction that undoes an automatic replacement removes that rule.
+    private func learnFromCorrection(_ misheard: [CorrectionDiff.Substitution], before: String, after: String,
+                                     historyID: UUID?, language: DictationLanguage) -> String? {
+        MainActor.assumeIsolated {
+            let vocabulary = VocabularyStore.shared
+            var notes: [String] = []
+
+            // "Linear" → "Linux" where a rule had turned the user's "Linux" into "Linear".
+            var undone = Set<String>()
+            let changes = CorrectionDiff.substitutions(from: before, to: after) + misheard
+            for change in changes where !undone.contains(change.correct) {
+                if let term = vocabulary.forgetMisheard(change.correct, replacedBy: change.wrong) {
+                    undone.insert(change.correct)
+                    notes.append(String(localized: "以后不再把 \(change.correct) 自动换成 \(term)"))
+                }
+            }
+
+            for pair in misheard {
+                let correct = language.normalizeScript(pair.correct)
+                // Only pairs that really appear in the before/after text, and not the reverse of a rule just removed.
+                guard before.contains(pair.wrong), !after.contains(pair.wrong), after.contains(correct),
+                      pair.wrong.count <= CorrectionDiff.maxWrongLength, correct.count <= CorrectionDiff.maxCorrectLength,
+                      pair.wrong.lowercased() != correct.lowercased(), !undone.contains(correct) else { continue }
+                let inUse = HistoryStore.shared.keptTextContains(pair.wrong, excluding: historyID)
+                guard let (term, result) = vocabulary.learnMisheard(pair.wrong, as: correct, isInUse: inUse) else { continue }
+                switch result {
+                case .autoReplace:
+                    notes.append(String(localized: "已记住：以后 \(pair.wrong) 自动换成 \(term)"))
+                case .hotword where inUse:
+                    notes.append(String(localized: "已把 \(term) 加入热词（你也会说 \(pair.wrong)，所以不自动替换）"))
+                case .hotword:
+                    notes.append(String(localized: "已把 \(term) 加入热词，同样的错再纠正一次就自动替换"))
+                }
+            }
+            return notes.isEmpty ? nil : notes.joined(separator: "；")
+        }
+    }
+
     /// Drops one final "。" or "." (not "…" / "..."); question and exclamation marks stay.
     static func removingTrailingPeriod(_ text: String) -> String {
         var trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -380,12 +544,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         return trimmed
     }
     
-    private func recordHistory(finalText: String, polishedWith: PolishProvider?) {
+    @discardableResult
+    private func recordHistory(finalText: String, polishedWith: PolishProvider?) -> UUID? {
         let cost = currentAudioSeconds * currentProvider.estimatedYuanPerSecond(currentMode)
             + (polishedWith?.estimatedYuan(characters: currentRawText.count) ?? 0)
         let raw = currentRawText, seconds = currentAudioSeconds, provider = currentProvider.shortName
         // The pipeline always runs on the main thread.
-        MainActor.assumeIsolated {
+        return MainActor.assumeIsolated {
             HistoryStore.shared.record(
                 rawText: raw,
                 finalText: finalText,

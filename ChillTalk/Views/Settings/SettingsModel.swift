@@ -95,8 +95,18 @@ final class SettingsModel: ObservableObject {
         didSet {
             guard hotkeyPreset != oldValue else { return }
             settings.setHotkeyPreset(hotkeyPreset)
+            // One key can't do both.
+            if correctionHotkeyPreset == hotkeyPreset { correctionHotkeyPreset = nil }
             NotificationCenter.default.post(name: .hotkeyConfigChanged, object: nil)
             markSaved("hotkeyPreset")
+        }
+    }
+    @Published var correctionHotkeyPreset: HotkeyPreset? {
+        didSet {
+            guard correctionHotkeyPreset != oldValue else { return }
+            settings.setCorrectionHotkeyPreset(correctionHotkeyPreset)
+            NotificationCenter.default.post(name: .hotkeyConfigChanged, object: nil)
+            markSaved("correctionHotkeyPreset")
         }
     }
 
@@ -119,6 +129,7 @@ final class SettingsModel: ObservableObject {
         dashScopePolishModel = settings.getDashScopePolishModel()
         openRouterModel = settings.getOpenRouterModel()
         hotkeyPreset = settings.getHotkeyPreset()
+        correctionHotkeyPreset = settings.getCorrectionHotkeyPreset()
         keepsTrailingPeriod = settings.keepsTrailingPeriod()
         recognitionContext = settings.getRecognitionContext()
         phoneticCorrection = settings.isPhoneticCorrectionEnabled()
@@ -171,6 +182,7 @@ final class SettingsModel: ObservableObject {
         if dashScopePolishModel != settings.getDashScopePolishModel() { dashScopePolishModel = settings.getDashScopePolishModel() }
         if openRouterModel != settings.getOpenRouterModel() { openRouterModel = settings.getOpenRouterModel() }
         if hotkeyPreset != settings.getHotkeyPreset() { hotkeyPreset = settings.getHotkeyPreset() }
+        if correctionHotkeyPreset != settings.getCorrectionHotkeyPreset() { correctionHotkeyPreset = settings.getCorrectionHotkeyPreset() }
         if keepsTrailingPeriod != settings.keepsTrailingPeriod() { keepsTrailingPeriod = settings.keepsTrailingPeriod() }
         if phoneticCorrection != settings.isPhoneticCorrectionEnabled() { phoneticCorrection = settings.isPhoneticCorrectionEnabled() }
         if recognitionContext != settings.getRecognitionContext() { recognitionContext = settings.getRecognitionContext() }

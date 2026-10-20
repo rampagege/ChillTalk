@@ -59,7 +59,7 @@ final class SyncService: ObservableObject {
     /// UserDefaults keys synced as settings (no API keys; those live in the Keychain).
     static let settingKeys = [
         "asrProvider", "dashScopeASRModel", "dashScopeBatchASRModel", "polishEnabled", "polishProvider", "dashScopePolishModel",
-        "openRouterModel", "hotkeyPreset", "trailingPeriod", "phoneticCorrection",
+        "openRouterModel", "hotkeyPreset", "correctionHotkeyPreset", "trailingPeriod", "phoneticCorrection",
         "dictationLanguage", "mixEnglish", "voiceProcessing", "recognitionMode"
     ]
     private static let contextKey = "recognitionContext"

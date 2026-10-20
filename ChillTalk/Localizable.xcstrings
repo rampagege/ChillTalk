@@ -9990,6 +9990,618 @@
           }
         }
       }
+    },
+    "还没有可以纠正的上一句": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing to correct yet"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだ修正できる直前の入力がありません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "아직 고칠 이전 입력이 없습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有可以纠正的上一句"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "還沒有可以糾正的上一句"
+          }
+        }
+      }
+    },
+    "没有需要修改的地方": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing needed changing"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "変更する箇所はありませんでした"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "바꿀 부분이 없습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有需要修改的地方"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "沒有需要修改的地方"
+          }
+        }
+      }
+    },
+    "纠正失败：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correction failed: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修正に失敗しました：%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고치기 실패: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "纠正失败：%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "糾正失敗：%@"
+          }
+        }
+      }
+    },
+    "找不到上一句的位置，修改结果已复制到剪贴板": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't find the previous text; the corrected version is on the clipboard"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直前の入力の位置が見つからないため、修正結果をクリップボードにコピーしました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 입력 위치를 찾지 못해 고친 결과를 클립보드에 복사했습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到上一句的位置，修改结果已复制到剪贴板"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "找不到上一句的位置，修改結果已拷貝到剪貼簿"
+          }
+        }
+      }
+    },
+    "说说上一句要怎么改…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Say how to change it…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "どう直すか話してください…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "어떻게 고칠지 말하세요…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "说说上一句要怎么改…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "說說上一句要怎麼改…"
+          }
+        }
+      }
+    },
+    "正在修改上一句…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correcting…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修正しています…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고치는 중…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在修改上一句…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在修改上一句…"
+          }
+        }
+      }
+    },
+    "纠正上一句 · 再按快捷键结束 · Esc 取消": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correcting last text · Press the shortcut again to finish · Esc to cancel"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直前の入力を修正 · もう一度ショートカットで終了 · Esc でキャンセル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 입력 고치기 · 단축키를 다시 눌러 끝내기 · Esc로 취소"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "纠正上一句 · 再按快捷键结束 · Esc 取消"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "糾正上一句 · 再按快速鍵結束 · Esc 取消"
+          }
+        }
+      }
+    },
+    "正在修改上一句… · Esc 取消": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correcting… · Esc to cancel"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "修正しています… · Esc でキャンセル"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "고치는 중… · Esc로 취소"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在修改上一句… · Esc 取消"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在修改上一句… · Esc 取消"
+          }
+        }
+      }
+    },
+    "纠正上一句": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correct last text"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直前の入力を修正"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 입력 고치기"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "纠正上一句"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "糾正上一句"
+          }
+        }
+      }
+    },
+    "不使用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用しない"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "사용 안 함"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不使用"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不使用"
+          }
+        }
+      }
+    },
+    "纠正上一句需要 %@ 密钥，请先在「文字润色」里配置": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Correcting needs a %@ key. Add one under Text polish first."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "直前の入力の修正には %@ のキーが必要です。先に「テキスト整形」で設定してください"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이전 입력을 고치려면 %@ 키가 필요합니다. 먼저 '텍스트 다듬기'에서 설정하세요"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "纠正上一句需要 %@ 密钥，请先在「文字润色」里配置"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "糾正上一句需要 %@ 金鑰，請先在「文字潤飾」中設定"
+          }
+        }
+      }
+    },
+    "按下后说要怎么改，比如「把张三改成章山」，也可以把上一句重说一遍。使用「文字润色」的密钥。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press it and say how to change what you just dictated, e.g. “change Mike to Mark”, or just say it again. Uses the Text polish key."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "押してから直し方を話します（例：「田中を中田に変えて」）。言い直しても構いません。「テキスト整形」のキーを使います。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "누른 뒤 고칠 방법을 말하세요(예: '김철수를 김철호로 바꿔'). 다시 말해도 됩니다. '텍스트 다듬기'의 키를 사용합니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按下后说要怎么改，比如「把张三改成章山」，也可以把上一句重说一遍。使用「文字润色」的密钥。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按下後說要怎麼改，例如「把張三改成章山」，也可以把上一句重說一遍。使用「文字潤飾」的金鑰。"
+          }
+        }
+      }
+    },
+    "以后不再把 %@ 自动换成 %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Won't change %1$@ to %2$@ automatically anymore"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "今後は %1$@ を %2$@ に自動で置き換えません"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "앞으로 %1$@을(를) %2$@(으)로 자동으로 바꾸지 않습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以后不再把 %@ 自动换成 %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "以後不再把 %@ 自動換成 %@"
+          }
+        }
+      }
+    },
+    "已记住：以后 %@ 自动换成 %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remembered: %1$@ will be changed to %2$@ automatically"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "記憶しました：今後 %1$@ は %2$@ に自動で置き換えます"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기억함: 앞으로 %1$@을(를) %2$@(으)로 자동으로 바꿉니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已记住：以后 %@ 自动换成 %@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已記住：以後 %@ 自動換成 %@"
+          }
+        }
+      }
+    },
+    "已把 %@ 加入热词（你也会说 %@，所以不自动替换）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added %1$@ as a hot word (you also say %2$@, so it isn't replaced automatically)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ をホットワードに追加しました（%2$@ も使うため自動置換はしません）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@을(를) 핫워드에 추가했습니다(%2$@도 쓰시므로 자동으로 바꾸지 않습니다)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已把 %@ 加入热词（你也会说 %@，所以不自动替换）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已把 %@ 加入熱詞（你也會說 %@，所以不自動替換）"
+          }
+        }
+      }
+    },
+    "已把 %@ 加入热词，同样的错再纠正一次就自动替换": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Added %@ as a hot word; correct the same mistake once more to replace it automatically"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ をホットワードに追加しました。同じ誤りをもう一度直すと自動置換になります"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@을(를) 핫워드에 추가했습니다. 같은 오류를 한 번 더 고치면 자동으로 바꿉니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已把 %@ 加入热词，同样的错再纠正一次就自动替换"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已把 %@ 加入熱詞，同樣的錯再糾正一次就自動替換"
+          }
+        }
+      }
+    },
+    "观察中：%@，再纠正一次就自动替换": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Watching: %@ — correct it once more to replace automatically"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "様子見：%@（もう一度直すと自動置換）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "관찰 중: %@ — 한 번 더 고치면 자동으로 바꿉니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "观察中：%@，再纠正一次就自动替换"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "觀察中：%@，再糾正一次就自動替換"
+          }
+        }
+      }
+    },
+    "语音纠正时学到的写法。你没有在别处用过它，并且纠正满 %lld 次，才会自动替换": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Learned from spoken corrections. It's replaced automatically once corrected %lld times, as long as you haven't used it elsewhere."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音声での修正から覚えた表記です。ほかで使っておらず、%lld 回修正すると自動置換になります"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "음성 고치기에서 배운 표기입니다. 다른 곳에서 쓴 적이 없고 %lld번 고치면 자동으로 바꿉니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语音纠正时学到的写法。你没有在别处用过它，并且纠正满 %lld 次，才会自动替换"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "語音糾正時學到的寫法。你沒有在別處用過它，並且糾正滿 %lld 次，才會自動替換"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

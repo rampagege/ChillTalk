@@ -50,7 +50,6 @@ final class TextInserter {
         }
 
         let focus = focusedFieldKind()
-        let pasteboard = NSPasteboard.general
 
         if focus == .notEditable {
             copyToClipboard(text)
@@ -59,6 +58,81 @@ final class TextInserter {
             return
         }
 
+        guard paste(text) else {
+            // Leave the text on the clipboard so the user can paste manually.
+            completion(.failure(TextInserterError.insertionFailed))
+            return
+        }
+        // Report success right away so the HUD disappears together with the pasted text;
+        // the clipboard restore happens on its own shortly after.
+        completion(.success(.pasted))
+    }
+
+    /// The field text was inserted into, so a later correction can find it again.
+    struct Target {
+        let pid: pid_t
+        let element: AXUIElement?
+    }
+
+    /// Must be called on the main thread, right after a successful insert.
+    func currentTarget() -> Target? {
+        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { return nil }
+        return Target(pid: pid, element: focusedElement())
+    }
+
+    enum ReplaceOutcome {
+        case replaced
+        /// The old text couldn't be found safely; the new text is only on the clipboard.
+        case copiedOnly
+    }
+
+    /// Replaces `old`, which was inserted into `target` earlier and should sit right before
+    /// the caret, with `new`. Prefers selecting `old` through Accessibility; if the app doesn't
+    /// expose its text (terminals, some Electron apps), deletes it with Backspace, but only
+    /// when `allowBlindDelete` says nothing was typed or clicked since. Must be called on the
+    /// main thread.
+    func replace(_ old: String, with new: String, in target: Target, allowBlindDelete: Bool,
+                 completion: @escaping (Result<ReplaceOutcome, Error>) -> Void) {
+        guard PermissionManager.shared.hasAccessibilityPermission() else {
+            copyToClipboard(new)
+            completion(.failure(TextInserterError.noAccessibilityPermission))
+            return
+        }
+        guard NSWorkspace.shared.frontmostApplication?.processIdentifier == target.pid else {
+            copyToClipboard(new)
+            completion(.success(.copiedOnly))
+            return
+        }
+
+        let element = focusedElement()
+        var deleteCount = 0
+        if let element, selectTextBeforeCaret(old, in: element) {
+            // Pasting replaces the selection.
+        } else if allowBlindDelete, Self.isSameElement(element, target.element) {
+            deleteCount = old.count
+            guard postBackspaces(deleteCount) else {
+                copyToClipboard(new)
+                completion(.failure(TextInserterError.insertionFailed))
+                return
+            }
+        } else {
+            copyToClipboard(new)
+            completion(.success(.copiedOnly))
+            return
+        }
+
+        // A long run of Backspaces can take the app a moment; don't restore the clipboard
+        // before it gets to the paste.
+        guard paste(new, restoreAfter: restoreDelay + Double(deleteCount) * 0.005) else {
+            completion(.failure(TextInserterError.insertionFailed))
+            return
+        }
+        completion(.success(.replaced))
+    }
+
+    /// Puts `text` on the clipboard, sends ⌘V, and later restores what was on the clipboard.
+    private func paste(_ text: String, restoreAfter delay: TimeInterval? = nil) -> Bool {
+        let pasteboard = NSPasteboard.general
         let saved = snapshot(of: pasteboard)
         pasteboard.clearContents()
         pasteboard.setString(text, forType: .string)
@@ -66,23 +140,16 @@ final class TextInserter {
         pasteboard.setString("", forType: NSPasteboard.PasteboardType("org.nspasteboard.TransientType"))
         let ourChangeCount = pasteboard.changeCount
 
-        guard postCommandV() else {
-            // Leave the text on the clipboard so the user can paste manually.
-            completion(.failure(TextInserterError.insertionFailed))
-            return
-        }
+        guard postCommandV() else { return false }
 
-        // Report success right away so the HUD disappears together with the pasted text;
-        // the clipboard restore happens on its own shortly after.
-        completion(.success(.pasted))
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + restoreDelay) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + (delay ?? restoreDelay)) {
             // Only restore if nobody else changed the clipboard in the meantime.
             if pasteboard.changeCount == ourChangeCount {
                 pasteboard.clearContents()
                 if !saved.isEmpty { pasteboard.writeObjects(saved) }
             }
         }
+        return true
     }
 
     func copyToClipboard(_ text: String) {
@@ -101,6 +168,52 @@ final class TextInserter {
         kAXMenuRole, kAXMenuItemRole, kAXMenuBarRole, kAXCheckBoxRole, kAXRadioButtonRole,
         kAXApplicationRole
     ]
+
+    private func focusedElement() -> AXUIElement? {
+        let systemWide = AXUIElementCreateSystemWide()
+        // Don't let a hung app stall insertion.
+        AXUIElementSetMessagingTimeout(systemWide, 0.25)
+        var focusedRef: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(systemWide, kAXFocusedUIElementAttribute as CFString, &focusedRef) == .success,
+              let focusedRef, CFGetTypeID(focusedRef) == AXUIElementGetTypeID() else { return nil }
+        return (focusedRef as! AXUIElement)
+    }
+
+    /// Unknown on either side counts as the same: only a positive mismatch rules it out.
+    private static func isSameElement(_ a: AXUIElement?, _ b: AXUIElement?) -> Bool {
+        guard let a, let b else { return true }
+        return CFEqual(a, b)
+    }
+
+    /// Selects `expected` if it's exactly the text before the caret. False if the app doesn't
+    /// expose its text, or the text there is different.
+    private func selectTextBeforeCaret(_ expected: String, in element: AXUIElement) -> Bool {
+        var valueRef: CFTypeRef?
+        var rangeRef: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(element, kAXValueAttribute as CFString, &valueRef) == .success,
+              let value = valueRef as? String,
+              AXUIElementCopyAttributeValue(element, kAXSelectedTextRangeAttribute as CFString, &rangeRef) == .success,
+              let rangeRef, CFGetTypeID(rangeRef) == AXValueGetTypeID() else { return false }
+        var caret = CFRange()
+        guard AXValueGetValue(rangeRef as! AXValue, .cfRange, &caret), caret.length == 0 else { return false }
+
+        let text = value as NSString
+        let length = (expected as NSString).length
+        guard length > 0, caret.location >= length, caret.location <= text.length,
+              text.substring(with: NSRange(location: caret.location - length, length: length)) == expected else { return false }
+
+        var selection = CFRange(location: caret.location - length, length: length)
+        guard let newRange = AXValueCreate(.cfRange, &selection),
+              AXUIElementSetAttributeValue(element, kAXSelectedTextRangeAttribute as CFString, newRange) == .success else { return false }
+
+        // Some apps accept the call and ignore it.
+        var checkRef: CFTypeRef?
+        var check = CFRange()
+        guard AXUIElementCopyAttributeValue(element, kAXSelectedTextRangeAttribute as CFString, &checkRef) == .success,
+              let checkRef, CFGetTypeID(checkRef) == AXValueGetTypeID(),
+              AXValueGetValue(checkRef as! AXValue, .cfRange, &check) else { return false }
+        return check.location == selection.location && check.length == selection.length
+    }
 
     private func focusedFieldKind() -> FocusKind {
         let systemWide = AXUIElementCreateSystemWide()
@@ -150,6 +263,22 @@ final class TextInserter {
         up.flags = .maskCommand
         down.post(tap: .cghidEventTap)
         up.post(tap: .cghidEventTap)
+        return true
+    }
+
+    private func postBackspaces(_ count: Int) -> Bool {
+        guard let source = CGEventSource(stateID: .combinedSessionState) else { return false }
+        for _ in 0..<count {
+            guard let down = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_Delete), keyDown: true),
+                  let up = CGEvent(keyboardEventSource: source, virtualKey: CGKeyCode(kVK_Delete), keyDown: false) else {
+                return false
+            }
+            // Explicit empty flags so a held modifier can't turn this into ⌥⌫ (delete word).
+            down.flags = []
+            up.flags = []
+            down.post(tap: .cghidEventTap)
+            up.post(tap: .cghidEventTap)
+        }
         return true
     }
 
