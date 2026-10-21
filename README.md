@@ -1,10 +1,14 @@
 # ChillTalk
 
+[![Release](https://img.shields.io/github/v/release/rampagege/ChillTalk)](https://github.com/rampagege/ChillTalk/releases/latest) [![Downloads](https://img.shields.io/github/downloads/rampagege/ChillTalk/total)](https://github.com/rampagege/ChillTalk/releases) [![License: MIT](https://img.shields.io/github/license/rampagege/ChillTalk)](LICENSE)
+
 **简体中文** | [English](README.en.md)
 
 macOS 菜单栏语音输入。轻按快捷键开始说话，再按一次结束，润色后的文字直接出现在光标处。
 
 主打**专业名词识别**：个人词库、纠正学习、按发音纠错、行业词库。
+
+<p align="center"><img src="docs/demo.gif" alt="ChillTalk 演示" width="720"></p>
 
 ## 为什么做这个
 

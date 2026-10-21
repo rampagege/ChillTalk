@@ -1,10 +1,14 @@
 # ChillTalk
 
+[![Release](https://img.shields.io/github/v/release/rampagege/ChillTalk)](https://github.com/rampagege/ChillTalk/releases/latest) [![Downloads](https://img.shields.io/github/downloads/rampagege/ChillTalk/total)](https://github.com/rampagege/ChillTalk/releases) [![License: MIT](https://img.shields.io/github/license/rampagege/ChillTalk)](LICENSE)
+
 [简体中文](README.md) | **English**
 
 Voice dictation for the macOS menu bar. Tap a hotkey, speak, tap again — polished text appears at your cursor.
 
 Built for **domain terminology**: a personal vocabulary, learning from your corrections, sound-alike fixes and industry word packs.
+
+<p align="center"><img src="docs/demo-en.gif" alt="ChillTalk demo" width="720"></p>
 
 ## Why
 
