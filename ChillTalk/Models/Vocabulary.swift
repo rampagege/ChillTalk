@@ -410,23 +410,33 @@ final class VocabularyStore: ObservableObject {
         return d
     }
 
+    /// Writes run in order off the main thread: a hit-count update happens on every dictation
+    /// that uses a replacement, right before the text is pasted.
+    private static let ioQueue = DispatchQueue(label: "com.chilltalk.vocabulary.io", qos: .utility)
+
     private func saveDeleted() {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
         // Tombstones older than 90 days have long reached every Mac.
         let cutoff = Date().addingTimeInterval(-90 * 24 * 3600)
         deleted = deleted.filter { $0.value > cutoff }
-        try? encoder.encode(deleted).write(to: deletedURL, options: .atomic)
+        let deleted = self.deleted, deletedURL = self.deletedURL
+        Self.ioQueue.async {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            try? encoder.encode(deleted).write(to: deletedURL, options: .atomic)
+        }
     }
 
     private func save() {
         saveDeleted()
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        do {
-            try encoder.encode(entries).write(to: url, options: .atomic)
-        } catch {
-            print("⚠️ Failed to save vocabulary: \(error.localizedDescription)")
+        let entries = self.entries, url = self.url
+        Self.ioQueue.async {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            do {
+                try encoder.encode(entries).write(to: url, options: .atomic)
+            } catch {
+                print("⚠️ Failed to save vocabulary: \(error.localizedDescription)")
+            }
         }
     }
 }

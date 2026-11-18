@@ -174,13 +174,19 @@ final class HistoryStore: ObservableObject {
         return nil
     }
 
+    /// Writes happen in order on a background queue: encoding and writing 500 records right
+    /// after each dictation shouldn't hold up the main thread.
+    private static let ioQueue = DispatchQueue(label: "com.chilltalk.history.io", qos: .utility)
+
     private func save<T: Encodable>(_ value: T, to url: URL) {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        do {
-            try encoder.encode(value).write(to: url, options: .atomic)
-        } catch {
-            print("⚠️ Failed to save \(url.lastPathComponent): \(error.localizedDescription)")
+        Self.ioQueue.async {
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            do {
+                try encoder.encode(value).write(to: url, options: .atomic)
+            } catch {
+                print("⚠️ Failed to save \(url.lastPathComponent): \(error.localizedDescription)")
+            }
         }
     }
 }
