@@ -134,6 +134,12 @@ final class SyncService: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: work)
     }
 
+    /// Reads and writes run on this queue: files in iCloud Drive can block while the system
+    /// downloads or coordinates them, which must never stall the hotkey or the HUD.
+    private static let ioQueue = DispatchQueue(label: "com.chilltalk.sync.io", qos: .utility)
+    private var isRunning = false
+    private var rerunRequested = false
+
     func syncNow() {
         guard let root = root else { status = .unavailable; return }
         guard isAnyEnabled else {
@@ -142,35 +148,68 @@ final class SyncService: ObservableObject {
             history.remoteUsage = [:]
             return
         }
+        guard !isRunning else { rerunRequested = true; return }
+        isRunning = true
         status = .syncing
-        do {
-            let mine = root.appendingPathComponent("devices/\(deviceID)", isDirectory: true)
-            try FileManager.default.createDirectory(at: mine, withIntermediateDirectories: true)
-            // Stamp local edits first, so a not-yet-pushed local change beats an older remote one.
-            if enabled[.settings] == true { Self.settingKeys.forEach(stampSetting) }
-            if enabled[.vocabulary] == true { stampSetting(Self.contextKey) }
-            let others = try readOtherDevices(root: root)
-            pull(from: others)
-            try push(to: mine)
-            status = .idle(Date())
-        } catch {
-            status = .failed(error.localizedDescription)
+
+        let kinds = Set(enabled.filter(\.value).map(\.key))
+        let deviceID = self.deviceID
+        Self.ioQueue.async {
+            let remote = Self.readRemote(root: root, excluding: deviceID, kinds: kinds)
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    // Stamp local edits right before merging (not before the read, which takes
+                    // a while), so a change the user just made beats an older remote one.
+                    if self.enabled[.settings] == true { Self.settingKeys.forEach(self.stampSetting) }
+                    if self.enabled[.vocabulary] == true { self.stampSetting(Self.contextKey) }
+                    // Pull first, then push the merged result.
+                    self.pull(remote)
+                    let outgoing = self.outgoing()
+                    Self.ioQueue.async {
+                        let result = Result { try Self.write(outgoing, root: root, deviceID: deviceID) }
+                        DispatchQueue.main.async {
+                            MainActor.assumeIsolated { self.finishSync(result) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func finishSync(_ result: Result<Void, Error>) {
+        isRunning = false
+        switch result {
+        case _ where !isAnyEnabled: status = .off   // turned off while this sync ran
+        case .success: status = .idle(Date())
+        case .failure(let error): status = .failed(error.localizedDescription)
+        }
+        if rerunRequested {
+            rerunRequested = false
+            syncNow()
         }
     }
 
     // MARK: - Push (this Mac's folder)
 
-    private func push(to folder: URL) throws {
-        try write(Device(id: deviceID, name: deviceName, updatedAt: Date()), to: folder.appendingPathComponent("device.json"))
+    /// What this Mac writes, captured on the main thread so the background write sees one
+    /// consistent state.
+    private struct Outgoing {
+        var device: Device
+        var vocabulary: VocabularySnapshot?
+        var settings: [String: SyncedSetting]?
+        var usage: [String: DailyUsage]?
+        var history: [DictationRecord]?
+    }
 
+    private func outgoing() -> Outgoing {
+        var out = Outgoing(device: Device(id: deviceID, name: deviceName, updatedAt: Date()))
         if enabled[.vocabulary] == true {
-            let snapshot = VocabularySnapshot(
+            out.vocabulary = VocabularySnapshot(
                 entries: vocabulary.entries,
                 deleted: vocabulary.deleted,
                 context: defaults.string(forKey: Self.contextKey) ?? "",
                 contextUpdatedAt: defaults.object(forKey: "sync.stamp.\(Self.contextKey)") as? Date
             )
-            try write(snapshot, to: folder.appendingPathComponent("vocabulary.json"))
         }
         if enabled[.settings] == true {
             var values: [String: SyncedSetting] = [:]
@@ -179,14 +218,21 @@ final class SyncService: ObservableObject {
                       let stamp = defaults.object(forKey: "sync.stamp.\(key)") as? Date else { continue }
                 values[key] = SyncedSetting(value: value, updatedAt: stamp)
             }
-            try write(values, to: folder.appendingPathComponent("settings.json"))
+            out.settings = values
         }
-        if enabled[.usage] == true {
-            try write(history.usage, to: folder.appendingPathComponent("usage.json"))
-        }
-        if enabled[.history] == true {
-            try write(history.records, to: folder.appendingPathComponent("history.json"))
-        }
+        if enabled[.usage] == true { out.usage = history.usage }
+        if enabled[.history] == true { out.history = history.records }
+        return out
+    }
+
+    nonisolated private static func write(_ out: Outgoing, root: URL, deviceID: String) throws {
+        let folder = root.appendingPathComponent("devices/\(deviceID)", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try write(out.device, to: folder.appendingPathComponent("device.json"))
+        if let vocabulary = out.vocabulary { try write(vocabulary, to: folder.appendingPathComponent("vocabulary.json")) }
+        if let settings = out.settings { try write(settings, to: folder.appendingPathComponent("settings.json")) }
+        if let usage = out.usage { try write(usage, to: folder.appendingPathComponent("usage.json")) }
+        if let history = out.history { try write(history, to: folder.appendingPathComponent("history.json")) }
     }
 
     /// Records when a local setting last changed (compared with what was last pushed).
@@ -202,31 +248,49 @@ final class SyncService: ObservableObject {
 
     // MARK: - Pull (other Macs' folders)
 
-    private struct RemoteDevice {
-        let info: Device
-        let folder: URL
+    /// Other Macs' files, read and decoded off the main thread.
+    private struct RemoteData {
+        var devices: [Device] = []
+        var vocabulary: [VocabularySnapshot] = []
+        var settings: [[String: SyncedSetting]] = []
+        var usage: [[String: DailyUsage]] = []
+        var history: [[DictationRecord]] = []
     }
 
-    private func readOtherDevices(root: URL) throws -> [RemoteDevice] {
+    nonisolated private static func readRemote(root: URL, excluding deviceID: String, kinds: Set<Kind>) -> RemoteData {
+        var data = RemoteData()
         let devicesDir = root.appendingPathComponent("devices", isDirectory: true)
         guard let folders = try? FileManager.default.contentsOfDirectory(at: devicesDir, includingPropertiesForKeys: nil) else {
-            otherDevices = []
-            return []
+            return data
         }
-        let remotes: [RemoteDevice] = folders.compactMap { folder in
-            guard folder.lastPathComponent != deviceID,
-                  let info: Device = read(folder.appendingPathComponent("device.json")) else { return nil }
-            return RemoteDevice(info: info, folder: folder)
+        for folder in folders where folder.lastPathComponent != deviceID {
+            guard let info: Device = read(folder.appendingPathComponent("device.json")) else { continue }
+            data.devices.append(info)
+            if kinds.contains(.vocabulary), let snapshot: VocabularySnapshot = read(folder.appendingPathComponent("vocabulary.json")) {
+                data.vocabulary.append(snapshot)
+            }
+            if kinds.contains(.settings), let values: [String: SyncedSetting] = read(folder.appendingPathComponent("settings.json")) {
+                data.settings.append(values)
+            }
+            if kinds.contains(.usage), let usage: [String: DailyUsage] = read(folder.appendingPathComponent("usage.json")) {
+                data.usage.append(usage)
+            }
+            if kinds.contains(.history), var list: [DictationRecord] = read(folder.appendingPathComponent("history.json")) {
+                for i in list.indices { list[i].deviceName = info.name }
+                data.history.append(list)
+            }
         }
-        otherDevices = remotes.map(\.info).sorted { $0.updatedAt > $1.updatedAt }
-        return remotes
+        data.devices.sort { $0.updatedAt > $1.updatedAt }
+        return data
     }
 
-    private func pull(from remotes: [RemoteDevice]) {
+    /// Merges what other Macs wrote. Kinds turned off since the read are skipped.
+    private func pull(_ remote: RemoteData) {
+        otherDevices = remote.devices
+
         if enabled[.vocabulary] == true {
             isApplyingRemote = true
-            for remote in remotes {
-                guard let snapshot: VocabularySnapshot = read(remote.folder.appendingPathComponent("vocabulary.json")) else { continue }
+            for snapshot in remote.vocabulary {
                 vocabulary.merge(remote: snapshot.entries, remoteDeleted: snapshot.deleted)
                 if let stamp = snapshot.contextUpdatedAt,
                    stamp > (defaults.object(forKey: "sync.stamp.\(Self.contextKey)") as? Date ?? .distantPast) {
@@ -238,8 +302,7 @@ final class SyncService: ObservableObject {
 
         if enabled[.settings] == true {
             var changed = false
-            for remote in remotes {
-                guard let values: [String: SyncedSetting] = read(remote.folder.appendingPathComponent("settings.json")) else { continue }
+            for values in remote.settings {
                 for (key, setting) in values where Self.settingKeys.contains(key) {
                     let localStamp = defaults.object(forKey: "sync.stamp.\(key)") as? Date ?? .distantPast
                     if setting.updatedAt > localStamp {
@@ -253,8 +316,7 @@ final class SyncService: ObservableObject {
 
         if enabled[.usage] == true {
             var total: [String: DailyUsage] = [:]
-            for remote in remotes {
-                guard let usage: [String: DailyUsage] = read(remote.folder.appendingPathComponent("usage.json")) else { continue }
+            for usage in remote.usage {
                 for (day, value) in usage { total[day] = HistoryStore.sum([total[day] ?? DailyUsage(), value]) }
             }
             history.remoteUsage = total
@@ -262,17 +324,7 @@ final class SyncService: ObservableObject {
             history.remoteUsage = [:]
         }
 
-        if enabled[.history] == true {
-            var records: [DictationRecord] = []
-            for remote in remotes {
-                guard var list: [DictationRecord] = read(remote.folder.appendingPathComponent("history.json")) else { continue }
-                for i in list.indices { list[i].deviceName = remote.info.name }
-                records += list
-            }
-            history.remoteRecords = records
-        } else {
-            history.remoteRecords = []
-        }
+        history.remoteRecords = enabled[.history] == true ? remote.history.flatMap { $0 } : []
         applyRemoteHistoryVisibility()
     }
 
@@ -296,28 +348,54 @@ final class SyncService: ObservableObject {
 
     // MARK: - Files
 
-    private func write<T: Encodable>(_ value: T, to url: URL) throws {
+    nonisolated private static func write<T: Encodable>(_ value: T, to url: URL) throws {
         let encoder = JSONEncoder()
         // Sub-second precision: "last edit wins" must order edits made within one second.
         encoder.dateEncodingStrategy = .secondsSince1970
-        try encoder.encode(value).write(to: url, options: .atomic)
+        let data = try encoder.encode(value)
+        var coordinationError: NSError?
+        var writeError: Error?
+        NSFileCoordinator().coordinate(writingItemAt: url, options: .forReplacing, error: &coordinationError) { url in
+            do { try data.write(to: url, options: .atomic) } catch { writeError = error }
+        }
+        if let error = coordinationError ?? writeError { throw error }
     }
 
-    /// Reads a JSON file; if iCloud evicted it to a placeholder, asks for a download and
-    /// returns nil (the next sync picks it up).
-    private func read<T: Decodable>(_ url: URL) -> T? {
+    /// Last successfully read contents per remote file, used while iCloud re-downloads one.
+    nonisolated private static let lastRead = RemoteFileCache()
+
+    /// Reads a JSON file. One that iCloud hasn't downloaded (or has evicted) is requested and
+    /// stands in with what was read last time, instead of blocking until it arrives or
+    /// dropping that Mac's data for a cycle.
+    nonisolated private static func read<T: Decodable>(_ url: URL) -> T? {
         let fm = FileManager.default
         if !fm.fileExists(atPath: url.path) {
+            // Older systems leave a ".name.icloud" placeholder instead of the file.
             let placeholder = url.deletingLastPathComponent().appendingPathComponent(".\(url.lastPathComponent).icloud")
             if fm.fileExists(atPath: placeholder.path) {
                 try? fm.startDownloadingUbiquitousItem(at: url)
+                return lastRead.value(for: url) as? T
             }
+            lastRead.remove(url)
             return nil
         }
-        guard let data = try? Data(contentsOf: url) else { return nil }
+        // Since macOS 14 an evicted file keeps its name but has no data on disk.
+        if let status = try? url.resourceValues(forKeys: [.ubiquitousItemDownloadingStatusKey]).ubiquitousItemDownloadingStatus,
+           status == .notDownloaded {
+            try? fm.startDownloadingUbiquitousItem(at: url)
+            return lastRead.value(for: url) as? T
+        }
+        var data: Data?
+        var coordinationError: NSError?
+        NSFileCoordinator().coordinate(readingItemAt: url, options: .withoutChanges, error: &coordinationError) { url in
+            data = try? Data(contentsOf: url)
+        }
+        guard let data else { return lastRead.value(for: url) as? T }
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .secondsSince1970
-        return try? decoder.decode(T.self, from: data)
+        guard let value = try? decoder.decode(T.self, from: data) else { return nil }
+        lastRead.set(value, for: url)
+        return value
     }
 
     private static func equal(_ a: Any?, _ b: Any?) -> Bool {
@@ -326,6 +404,30 @@ final class SyncService: ObservableObject {
         case let (x as NSObject, y as NSObject): return x.isEqual(y)
         default: return false
         }
+    }
+}
+
+/// Decoded remote files by path. Touched only from the sync I/O queue; locked anyway.
+private final class RemoteFileCache {
+    private let lock = NSLock()
+    private var values: [String: Any] = [:]
+
+    func value(for url: URL) -> Any? {
+        lock.lock()
+        defer { lock.unlock() }
+        return values[url.path]
+    }
+
+    func set(_ value: Any, for url: URL) {
+        lock.lock()
+        values[url.path] = value
+        lock.unlock()
+    }
+
+    func remove(_ url: URL) {
+        lock.lock()
+        values[url.path] = nil
+        lock.unlock()
     }
 }
 
