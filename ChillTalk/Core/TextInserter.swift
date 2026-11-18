@@ -24,8 +24,29 @@ final class TextInserter {
         case unknown
     }
 
-    /// Delay before restoring the clipboard, giving the target app time to read it.
-    private let restoreDelay: TimeInterval = 0.6
+    /// After the pasted text is first read, how long before the clipboard is restored.
+    private let restoreDelay: TimeInterval = 0.25
+    /// Never restore sooner than this after ⌘V: the first reader may not be the target (VM and
+    /// remote-desktop apps and some clipboard managers copy every new clipboard right away).
+    private let minimumRestoreDelay: TimeInterval = 0.6
+    /// Restore anyway if the app never asks for the text (nothing took the paste).
+    private let restoreFallback: TimeInterval = 3
+
+    /// The clipboard as it was when processing started, so copying it (which makes the source
+    /// app render every format, slow for big spreadsheet or image copies) happens while the
+    /// transcript is still on its way rather than right before the paste.
+    private var preparedSnapshot: (changeCount: Int, items: [NSPasteboardItem])?
+    /// Kept alive until the clipboard is restored: AppKit asks it for the text on paste.
+    private var activeProvider: PasteProvider?
+    /// The field the last `insert` pasted into, captured before the paste.
+    private(set) var lastInsertTarget: Target?
+
+    /// Call when recording stops; `insert` and `replace` use the snapshot if the clipboard
+    /// hasn't changed since. Must be called on the main thread.
+    func prepare() {
+        let pasteboard = NSPasteboard.general
+        preparedSnapshot = (pasteboard.changeCount, snapshot(of: pasteboard))
+    }
 
     /// Must be called on the main thread.
     /// - Parameter expectedPID: app that was frontmost when recording stopped. If another app
@@ -49,7 +70,10 @@ final class TextInserter {
             return
         }
 
-        let focus = focusedFieldKind()
+        let (focus, element) = focusedField()
+        // Captured now: querying the app over Accessibility right after ⌘V would make it wait
+        // on us (the pasted text is handed over lazily by this process) while we wait on it.
+        lastInsertTarget = NSWorkspace.shared.frontmostApplication.map { Target(pid: $0.processIdentifier, element: element) }
 
         if focus == .notEditable {
             copyToClipboard(text)
@@ -72,12 +96,6 @@ final class TextInserter {
     struct Target {
         let pid: pid_t
         let element: AXUIElement?
-    }
-
-    /// Must be called on the main thread, right after a successful insert.
-    func currentTarget() -> Target? {
-        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { return nil }
-        return Target(pid: pid, element: focusedElement())
     }
 
     enum ReplaceOutcome {
@@ -121,38 +139,65 @@ final class TextInserter {
             return
         }
 
-        // A long run of Backspaces can take the app a moment; don't restore the clipboard
-        // before it gets to the paste.
-        guard paste(new, restoreAfter: restoreDelay + Double(deleteCount) * 0.005) else {
+        // The paste sits behind the Backspaces in the event stream, and the clipboard is only
+        // restored once the app has read it, so a long run of Backspaces needs no extra wait.
+        guard paste(new) else {
             completion(.failure(TextInserterError.insertionFailed))
             return
         }
         completion(.success(.replaced))
     }
 
-    /// Puts `text` on the clipboard, sends ⌘V, and later restores what was on the clipboard.
-    private func paste(_ text: String, restoreAfter delay: TimeInterval? = nil) -> Bool {
+    /// Puts `text` on the clipboard, sends ⌘V, and restores what was on the clipboard once the
+    /// target app has read the text. A fixed delay instead would restore too early for a busy
+    /// app (an Electron app under load, a VM, remote desktop), which then pastes the old clipboard.
+    private func paste(_ text: String) -> Bool {
         let pasteboard = NSPasteboard.general
-        let saved = snapshot(of: pasteboard)
-        pasteboard.clearContents()
-        pasteboard.setString(text, forType: .string)
-        // Ask clipboard managers not to record this temporary entry.
-        pasteboard.setString("", forType: NSPasteboard.PasteboardType("org.nspasteboard.TransientType"))
-        let ourChangeCount = pasteboard.changeCount
-
-        guard postCommandV() else { return false }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + (delay ?? restoreDelay)) {
+        let saved = currentSnapshot(of: pasteboard)
+        let provider = PasteProvider(text: text)
+        var restored = false
+        var ourChangeCount = 0
+        let restore = { [weak self] in
+            guard !restored else { return }
+            restored = true
             // Only restore if nobody else changed the clipboard in the meantime.
             if pasteboard.changeCount == ourChangeCount {
                 pasteboard.clearContents()
                 if !saved.isEmpty { pasteboard.writeObjects(saved) }
             }
+            if self?.activeProvider === provider { self?.activeProvider = nil }
         }
+        let posted = Date()
+        // Set before the item is published; AppKit calls the provider on the main thread.
+        provider.onProvided = { [restoreDelay, minimumRestoreDelay] in
+            let delay = max(restoreDelay, minimumRestoreDelay - Date().timeIntervalSince(posted))
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: restore)
+        }
+
+        pasteboard.clearContents()
+        let item = NSPasteboardItem()
+        item.setDataProvider(provider, forTypes: [.string])
+        // Ask clipboard managers not to record this temporary entry.
+        item.setString("", forType: NSPasteboard.PasteboardType("org.nspasteboard.TransientType"))
+        pasteboard.writeObjects([item])
+        ourChangeCount = pasteboard.changeCount
+        activeProvider = provider
+
+        guard postCommandV() else { return false }
+        DispatchQueue.main.asyncAfter(deadline: .now() + restoreFallback, execute: restore)
         return true
     }
 
+    private func currentSnapshot(of pasteboard: NSPasteboard) -> [NSPasteboardItem] {
+        defer { preparedSnapshot = nil }
+        if let prepared = preparedSnapshot, prepared.changeCount == pasteboard.changeCount {
+            return prepared.items
+        }
+        return snapshot(of: pasteboard)
+    }
+
     func copyToClipboard(_ text: String) {
+        preparedSnapshot = nil
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.setString(text, forType: .string)
@@ -215,30 +260,30 @@ final class TextInserter {
         return check.location == selection.location && check.length == selection.length
     }
 
-    private func focusedFieldKind() -> FocusKind {
+    private func focusedField() -> (FocusKind, AXUIElement?) {
         let systemWide = AXUIElementCreateSystemWide()
         // Don't let a hung app stall insertion.
         AXUIElementSetMessagingTimeout(systemWide, 0.25)
 
         var focusedRef: CFTypeRef?
         let error = AXUIElementCopyAttributeValue(systemWide, kAXFocusedUIElementAttribute as CFString, &focusedRef)
-        if error == .noValue { return .notEditable }
+        if error == .noValue { return (.notEditable, nil) }
         guard error == .success, let focusedRef = focusedRef,
-              CFGetTypeID(focusedRef) == AXUIElementGetTypeID() else { return .unknown }
+              CFGetTypeID(focusedRef) == AXUIElementGetTypeID() else { return (.unknown, nil) }
         let element = focusedRef as! AXUIElement
 
         var roleRef: CFTypeRef?
         AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &roleRef)
         let role = roleRef as? String ?? ""
-        if Self.editableRoles.contains(role) { return .editable }
+        if Self.editableRoles.contains(role) { return (.editable, element) }
 
         for attribute in [kAXSelectedTextRangeAttribute, kAXValueAttribute] {
             var settable = DarwinBoolean(false)
             if AXUIElementIsAttributeSettable(element, attribute as CFString, &settable) == .success, settable.boolValue {
-                return .editable
+                return (.editable, element)
             }
         }
-        return Self.nonEditableRoles.contains(role) ? .notEditable : .unknown
+        return (Self.nonEditableRoles.contains(role) ? .notEditable : .unknown, element)
     }
 
     private func snapshot(of pasteboard: NSPasteboard) -> [NSPasteboardItem] {
@@ -251,6 +296,18 @@ final class TextInserter {
         }
     }
 
+    /// Marks the key events this app posts, so input monitoring can tell them from the user's.
+    private static let eventTag: Int64 = 0x4348_4C54  // "CHLT"
+
+    /// The event is a paste or Backspace this app sent, not the user typing.
+    static func isOwnEvent(_ event: NSEvent) -> Bool {
+        event.cgEvent?.getIntegerValueField(.eventSourceUserData) == eventTag
+    }
+
+    private static func tag(_ events: CGEvent...) {
+        events.forEach { $0.setIntegerValueField(.eventSourceUserData, value: eventTag) }
+    }
+
     private func postCommandV() -> Bool {
         let keyCode = Self.keyCodeForV()
         guard let source = CGEventSource(stateID: .combinedSessionState),
@@ -261,6 +318,7 @@ final class TextInserter {
         // Explicit flags so a still-held hotkey modifier (e.g. Option) can't turn this into ⌥⌘V.
         down.flags = .maskCommand
         up.flags = .maskCommand
+        Self.tag(down, up)
         down.post(tap: .cghidEventTap)
         up.post(tap: .cghidEventTap)
         return true
@@ -276,6 +334,7 @@ final class TextInserter {
             // Explicit empty flags so a held modifier can't turn this into ⌥⌫ (delete word).
             down.flags = []
             up.flags = []
+            Self.tag(down, up)
             down.post(tap: .cghidEventTap)
             up.post(tap: .cghidEventTap)
         }
@@ -305,6 +364,28 @@ final class TextInserter {
                 }
             }
             return fallback
+        }
+    }
+}
+
+/// Hands over the pasted text when the target app asks for it, and reports that it did.
+private final class PasteProvider: NSObject, NSPasteboardItemDataProvider {
+    let text: String
+    /// Called (main thread) the first time the text is read.
+    var onProvided: (() -> Void)?
+
+    init(text: String) {
+        self.text = text
+    }
+
+    func pasteboard(_ pasteboard: NSPasteboard?, item: NSPasteboardItem, provideDataForType type: NSPasteboard.PasteboardType) {
+        item.setString(text, forType: type)
+        let callback = onProvided
+        onProvided = nil
+        if Thread.isMainThread {
+            callback?()
+        } else {
+            DispatchQueue.main.async { callback?() }
         }
     }
 }

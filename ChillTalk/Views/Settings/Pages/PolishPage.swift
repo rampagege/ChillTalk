@@ -23,6 +23,14 @@ struct PolishPage: View {
                 }
             }
 
+            if model.asrProvider.polishesItself {
+                Label(String(localized: "当前识别服务 AssemblyAI Dictation 已自带润色，插入文字时不再调用这里的服务；「纠正上一句」仍然使用它。"),
+                      systemImage: "info.circle")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
             Card(title: String(localized: "服务")) {
                 CardRow(label: String(localized: "服务商"), savedKey: "polishProvider") {
                     Picker("", selection: $model.polishProvider) {
@@ -52,7 +60,8 @@ struct PolishPage: View {
                                        text: $model.dashScopePolishModel)
                     }
                 } else {
-                    CardRow(label: String(localized: "模型"), savedKey: "openRouterModel") {
+                    CardRow(label: String(localized: "模型"), detail: String(localized: "默认 anthropic/claude-haiku-5.5，已关闭思考以降低延迟"),
+                            savedKey: "openRouterModel") {
                         BrandTextField(placeholder: PolishProvider.openRouter.defaultModel,
                                        text: $model.openRouterModel)
                     }

@@ -539,40 +539,6 @@
         }
       }
     },
-    "ChillTalk 需要语音识别权限来实时显示您说话的内容。请在系统设置中授予权限。": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ChillTalk needs speech recognition permission to show what you say in real time. Please grant permission in System Settings."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ChillTalk は話している内容をリアルタイムで表示するために音声認識へのアクセスを必要とします。システム設定でアクセスを許可してください。"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ChillTalk가 말하는 내용을 실시간으로 표시하려면 음성 인식 권한이 필요합니다. 시스템 설정에서 권한을 허용하세요."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ChillTalk 需要语音识别权限来实时显示您说话的内容。请在系统设置中授予权限。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ChillTalk 需要語音辨識權限，以即時顯示您說話的內容。請在系統設定中授予權限。"
-          }
-        }
-      }
-    },
     "ChillTalk 需要辅助功能权限来插入文本到其他应用。请在系统设置中授予权限后重启应用。": {
       "localizations": {
         "en": {
@@ -3395,40 +3361,6 @@
         }
       }
     },
-    "实时流式 · 约 $0.45/小时 · 新用户送 $50 · 服务在国外": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Real-time streaming · about $0.45/hour · $50 free for new users · hosted outside China"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "リアルタイムストリーミング · 約 $0.45/時間 · 新規ユーザーは $50 分無料 · 海外のサービス"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "실시간 스트리밍 · 시간당 약 $0.45 · 신규 사용자 $50 무료 · 해외 서비스"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "实时流式 · 约 $0.45/小时 · 新用户送 $50 · 服务在国外"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "即時串流 · 約 $0.45/小時 · 新使用者送 $50 · 服務位於海外"
-          }
-        }
-      }
-    },
     "实时流式 · 约 ¥0.85/小时 · 服务在国外": {
       "localizations": {
         "en": {
@@ -3459,40 +3391,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "即時串流 · 約人民幣 0.85 元/小時 · 服務位於海外"
-          }
-        }
-      }
-    },
-    "实验性 · 说完后整段上传": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Experimental · uploads the whole clip when you finish"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "実験的 · 話し終えてからまとめてアップロード"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "실험적 · 말을 마친 후 전체 업로드"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "实验性 · 说完后整段上传"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "實驗性 · 說完後整段上傳"
           }
         }
       }
@@ -8053,40 +7951,6 @@
         }
       }
     },
-    "说完后整段上传": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Uploads the whole clip when you finish"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "話し終えてからまとめてアップロード"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "말을 마친 후 전체 업로드"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "说完后整段上传"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "說完後整段上傳"
-          }
-        }
-      }
-    },
     "说完后整段识别：更便宜、通常更准，但要多等 1–3 秒；录音时只显示声音波纹": {
       "localizations": {
         "en": {
@@ -9107,40 +8971,6 @@
         }
       }
     },
-    "需要语音识别权限": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Speech recognition permission required"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "音声認識へのアクセスが必要です"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "음성 인식 권한 필요"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "需要语音识别权限"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "需要語音辨識權限"
-          }
-        }
-      }
-    },
     "需要辅助功能权限": {
       "localizations": {
         "en": {
@@ -9239,40 +9069,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "需要麥克風權限"
-          }
-        }
-      }
-    },
-    "验证密钥是否有效": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Check whether the key is valid"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "キーが有効かどうかを確認します"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "키가 유효한지 확인합니다"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "验证密钥是否有效"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "驗證金鑰是否有效"
           }
         }
       }
@@ -10599,6 +10395,550 @@
           "stringUnit": {
             "state": "translated",
             "value": "語音糾正時學到的寫法。你沒有在別處用過它，並且糾正滿 %lld 次，才會自動替換"
+          }
+        }
+      }
+    },
+    "网络中断，识别结果可能不完整": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection dropped; the transcript may be incomplete"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接続が途切れたため、認識結果が不完全な可能性があります"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결이 끊겨 인식 결과가 불완전할 수 있습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网络中断，识别结果可能不完整"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "網路中斷，辨識結果可能不完整"
+          }
+        }
+      }
+    },
+    "润色结果和原话差别太大，已插入原文": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Polished text differed too much from what you said; inserted original text"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "整形結果が発話と大きく異なるため、原文を挿入しました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다듬은 결과가 원래 말과 너무 달라 원문을 삽입했습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "润色结果和原话差别太大，已插入原文"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "潤飾結果和原話差別太大，已插入原文"
+          }
+        }
+      }
+    },
+    "实验性 · 说完后整段上传 · Qwen3-ASR · 约 $0.03/小时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Experimental · uploads the whole clip when you finish · Qwen3-ASR · about $0.03/hour"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "試験的 · 話し終えてからまとめてアップロード · Qwen3-ASR · 約 $0.03/時間"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실험적 · 말을 마친 후 전체 업로드 · Qwen3-ASR · 시간당 약 $0.03"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实验性 · 说完后整段上传 · Qwen3-ASR · 约 $0.03/小时"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "實驗性 · 說完後整段上傳 · Qwen3-ASR · 約 $0.03/小時"
+          }
+        }
+      }
+    },
+    "实时流式 · 约 $0.30/小时 · 新用户送 $50 · 服务在国外": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-time streaming · about $0.30/hour · $50 free for new users · hosted outside China"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リアルタイムストリーミング · 約 $0.30/時間 · 新規ユーザーは $50 分無料 · 海外のサービス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실시간 스트리밍 · 시간당 약 $0.30 · 신규 사용자 $50 무료 · 해외 서비스"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实时流式 · 约 $0.30/小时 · 新用户送 $50 · 服务在国外"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即時串流 · 約 $0.30/小時 · 新使用者送 $50 · 服務位於海外"
+          }
+        }
+      }
+    },
+    "说完后整段上传 · GPT-Transcribe · 约 $0.27/小时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uploads the whole clip when you finish · GPT-Transcribe · about $0.27/hour"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "話し終えてからまとめてアップロード · GPT-Transcribe · 約 $0.27/時間"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말을 마친 후 전체 업로드 · GPT-Transcribe · 시간당 약 $0.27"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "说完后整段上传 · GPT-Transcribe · 约 $0.27/小时"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "說完後整段上傳 · GPT-Transcribe · 約 $0.27/小時"
+          }
+        }
+      }
+    },
+    "默认 anthropic/claude-haiku-5.5，已关闭思考以降低延迟": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Defaults to anthropic/claude-haiku-5.5, with reasoning off to reduce latency"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "デフォルトは anthropic/claude-haiku-5.5。遅延を抑えるため思考はオフにしています"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "기본값 anthropic/claude-haiku-5.5, 지연 시간을 줄이기 위해 추론을 껐습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认 anthropic/claude-haiku-5.5，已关闭思考以降低延迟"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "預設 anthropic/claude-haiku-5.5，已關閉思考以降低延遲"
+          }
+        }
+      }
+    },
+    "识别半秒静音，确认密钥和模型可用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcribes half a second of silence to check the key and model"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0.5 秒の無音を認識して、キーとモデルが使えるか確認します"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0.5초 무음을 인식해 키와 모델이 작동하는지 확인합니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "识别半秒静音，确认密钥和模型可用"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "辨識半秒靜音，確認金鑰和模型可用"
+          }
+        }
+      }
+    },
+    "请求编码失败：%@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't encode the request: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リクエストのエンコードに失敗しました：%@"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "요청 인코딩 실패: %@"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请求编码失败：%@"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "請求編碼失敗：%@"
+          }
+        }
+      }
+    },
+    "服务没有返回数据": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The service returned no data"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サービスからデータが返されませんでした"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "서비스가 데이터를 반환하지 않았습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服务没有返回数据"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服務沒有回傳資料"
+          }
+        }
+      }
+    },
+    "润色结果被截断": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The polished text was cut off"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "整形結果が途中で切れました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다듬은 결과가 잘렸습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "润色结果被截断"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "潤飾結果被截斷"
+          }
+        }
+      }
+    },
+    "等待润色结果超时": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timed out waiting for the polished text"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "整形結果の待機がタイムアウトしました"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "다듬은 결과를 기다리다 시간이 초과되었습니다"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待润色结果超时"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "等待潤飾結果逾時"
+          }
+        }
+      }
+    },
+    "为语音输入优化，延迟更低": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Built for voice input, lower latency"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音声入力向けに最適化、低遅延"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "음성 입력에 최적화, 더 낮은 지연"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为语音输入优化，延迟更低"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "為語音輸入最佳化，延遲更低"
+          }
+        }
+      }
+    },
+    "AssemblyAI 实时、说完再识别和 Dictation 共用": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shared by AssemblyAI real-time, after-you-finish and Dictation"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AssemblyAI のリアルタイム・話し終えてから認識・Dictation で共通"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AssemblyAI 실시간, 말을 마친 후 인식, Dictation에서 공유"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AssemblyAI 实时、说完再识别和 Dictation 共用"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AssemblyAI 即時、說完再辨識和 Dictation 共用"
+          }
+        }
+      }
+    },
+    "说完后识别并润色 · 约 $0.62/小时 · 不再另调润色 · 服务在国外": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcribes and polishes when you finish · about $0.62/hour · no separate polish call · hosted outside China"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "話し終えてから認識と整形 · 約 $0.62/時間 · 別途の整形呼び出しなし · 海外のサービス"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말을 마친 후 인식 및 다듬기 · 시간당 약 $0.62 · 별도 다듬기 호출 없음 · 해외 서비스"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "说完后识别并润色 · 约 $0.62/小时 · 不再另调润色 · 服务在国外"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "說完後辨識並潤飾 · 約 $0.62/小時 · 不再另外呼叫潤飾 · 服務位於海外"
+          }
+        }
+      }
+    },
+    "当前识别服务 AssemblyAI Dictation 已自带润色，插入文字时不再调用这里的服务；「纠正上一句」仍然使用它。": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AssemblyAI Dictation, your recognition service, already polishes the text, so this service isn't called when inserting. Correcting the last insertion still uses it."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在の認識サービス AssemblyAI Dictation は整形込みのため、挿入時にはここのサービスを呼び出しません。「直前の入力を修正」では引き続き使用します。"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "현재 인식 서비스 AssemblyAI Dictation은 다듬기가 포함되어 있어 삽입할 때 여기의 서비스를 호출하지 않습니다. '직전 입력 수정'에는 계속 사용됩니다."
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前识别服务 AssemblyAI Dictation 已自带润色，插入文字时不再调用这里的服务；「纠正上一句」仍然使用它。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目前的辨識服務 AssemblyAI Dictation 已內建潤飾，插入文字時不再呼叫這裡的服務；「修正上一句」仍然使用它。"
+          }
+        }
+      }
+    },
+    "AssemblyAI Dictation（说完出字 · 自带润色）": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AssemblyAI Dictation (text when you finish · built-in polish)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AssemblyAI Dictation（話し終えてから表示 · 整形込み）"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AssemblyAI Dictation (말을 마친 후 표시 · 다듬기 포함)"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AssemblyAI Dictation（说完出字 · 自带润色）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AssemblyAI Dictation（說完出字 · 內建潤飾）"
           }
         }
       }

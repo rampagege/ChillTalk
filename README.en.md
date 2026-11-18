@@ -19,7 +19,7 @@ ChillTalk does just that. It calls the Qwen API directly (or AssemblyAI, Deepgra
 ## Features
 
 - Global hotkey (Right ⌥ by default), Esc to cancel; choose real-time (text as you speak) or after-you-finish (cheaper, usually more accurate)
-- Six recognition providers: Qwen / Alibaba Cloud Model Studio, AssemblyAI, Deepgram, Soniox, OpenAI, OpenRouter; pick the Qwen model per mode
+- Six recognition providers: Qwen / Alibaba Cloud Model Studio, AssemblyAI, Deepgram, Soniox, OpenAI, OpenRouter; pick the Qwen model per mode; AssemblyAI Dictation transcribes and polishes in one call
 - LLM polish: removes filler words, adds punctuation, resolves self-corrections, keeps your meaning
 - Vocabulary: hot words, key terms, background context, automatic replacement of misheard spellings, sound-alike correction, industry packs
 - Correct the last dictation by voice: press a second hotkey and say "change Mike to Mark", or just say it again, and the text you just dictated is replaced; misheard words go into your vocabulary
@@ -45,12 +45,13 @@ For Chinese, one pay-as-you-go key from the [Qwen AI Platform](https://www.qianw
 | Recognition | Price (approx.) | Free for new users | Notes |
 |---|---|---|---|
 | Qwen / Alibaba Cloud Model Studio | Real-time CN¥0.5/hour<br>After you finish CN¥0.1/hour | For 90 days, **per model**: 10 hours for per-second models, 1M tokens (≈12 hours) for the 3.1 series | Recommended for Chinese; the same key works for polish |
-| AssemblyAI | Real-time $0.45/hour<br>After you finish $0.21/hour | $50, no expiry, no card | Hosted in the US |
+| AssemblyAI | Real-time $0.30/hour<br>After you finish $0.21/hour<br>Dictation $0.62/hour (polish included) | $50, no expiry, no card | Hosted in the US |
 | Deepgram | $0.46/hour | $200, no expiry, no card | Real-time only; Chinese as Mandarin |
 | Soniox | $0.12/hour | None (ended Oct 2025) | Real-time only; good with mixed Chinese/English |
-| OpenAI / OpenRouter | ≈$0.36/hour | None | After you finish only; weaker on Chinese |
+| OpenAI | ≈$0.27/hour | None | After you finish only; GPT-Transcribe |
+| OpenRouter | ≈$0.03/hour | None | After you finish only; Qwen3-ASR, good at Chinese |
 
-Prices and free quotas as of October 2026; check each provider's site. Remaining quota is shown in each provider's console.
+Prices and free quotas as of November 2026; check each provider's site. Remaining quota is shown in each provider's console.
 
 ## Privacy
 

@@ -66,11 +66,14 @@ enum ASRProviderType: String, CaseIterable {
     case openRouter = "OpenRouter（实验）"
     case soniox = "Soniox"
     case assemblyAI = "AssemblyAI"
+    case assemblyAIDictation = "AssemblyAI Dictation"
 
     var displayName: String {
         switch self {
         case .dashScope: return String(localized: "千问 / 阿里云百炼")
         case .openRouter: return String(localized: "OpenRouter（实验）")
+        case .openAIWhisper: return "OpenAI"
+        case .assemblyAIDictation: return String(localized: "AssemblyAI Dictation（说完出字 · 自带润色）")
         default: return rawValue
         }
     }
@@ -78,16 +81,19 @@ enum ASRProviderType: String, CaseIterable {
     var supportsRealtime: Bool {
         switch self {
         case .dashScope, .deepgram, .soniox, .assemblyAI: return true
-        case .openAIWhisper, .openRouter: return false
+        case .openAIWhisper, .openRouter, .assemblyAIDictation: return false
         }
     }
 
     var supportsBatch: Bool {
         switch self {
-        case .dashScope, .assemblyAI, .openAIWhisper, .openRouter: return true
+        case .dashScope, .assemblyAI, .openAIWhisper, .openRouter, .assemblyAIDictation: return true
         case .deepgram, .soniox: return false
         }
     }
+
+    /// The provider returns cleaned-up text itself, so ChillTalk's polish is skipped.
+    var polishesItself: Bool { self == .assemblyAIDictation }
 
     /// The preferred mode if this provider supports it, otherwise the one it does.
     func effectiveMode(_ preferred: RecognitionMode) -> RecognitionMode {
@@ -103,16 +109,18 @@ enum ASRProviderType: String, CaseIterable {
         switch (self, mode) {
         case (.dashScope, .batch):
             return DashScopeASRModel.yuanPerSecond(SettingsManager.shared.getDashScopeBatchModel(), mode: .batch)
-        case (.assemblyAI, .batch): return (0.21 + 0.05) * 7.1 / 3600  // Universal-3.5 Pro + keyterms
+        case (.assemblyAI, .batch): return (0.21 + 0.05) * 7.1 / 3600  // AssemblyAI-STT-3.7 + keyterms
         default: break
         }
         switch self {
         case .dashScope:
             return DashScopeASRModel.yuanPerSecond(SettingsManager.shared.getDashScopeASRModel(), mode: .realtime)
         case .deepgram: return 0.0077 * 7.1 / 60   // $0.0077/min streaming
-        case .openAIWhisper, .openRouter: return 0.006 * 7.1 / 60  // $0.006/min
+        case .openAIWhisper: return 0.0045 * 7.1 / 60   // $0.0045/min GPT-Transcribe
+        case .openRouter: return 0.000008 * 7.1         // $0.000008/s Qwen3-ASR 1.7B
         case .soniox: return 0.12 * 7.1 / 3600      // $0.12/h real-time
-        case .assemblyAI: return 0.45 * 7.1 / 3600  // $0.45/h Universal-3.6 Pro real-time
+        case .assemblyAI: return 0.30 * 7.1 / 3600  // $0.30/h AssemblyAI-STT-3.7-Realtime
+        case .assemblyAIDictation: return 0.62 * 7.1 / 3600  // $0.62/h, cleanup included
         }
     }
 
@@ -123,11 +131,11 @@ enum ASRProviderType: String, CaseIterable {
         case .openAIWhisper: return "OpenAI"
         case .openRouter: return "OpenRouter"
         case .soniox: return "Soniox"
-        case .assemblyAI: return "AssemblyAI"
+        case .assemblyAI, .assemblyAIDictation: return "AssemblyAI"
         }
     }
 
-    /// `hints` are used by providers that support them (DashScope, Soniox); others ignore them.
+    /// `hints` are used by providers that support them; OpenRouter only takes the language.
     func makeSession(apiKey: String, hints: RecognitionHints = .none, mode: RecognitionMode = .realtime) -> ASRSession {
         switch (self, effectiveMode(mode)) {
         case (.dashScope, .batch): return QwenBatchASR(apiKey: apiKey, model: SettingsManager.shared.getDashScopeBatchModel(),
@@ -137,12 +145,14 @@ enum ASRProviderType: String, CaseIterable {
         }
         switch self {
         case .dashScope: return DashScopeASR(apiKey: apiKey, model: SettingsManager.shared.getDashScopeASRModel(),
-                                             hints: hints)
+                                             hints: hints,
+                                             removeDisfluencies: !SettingsManager.shared.isPolishEnabled())
         case .deepgram: return DeepgramASR(apiKey: apiKey, hints: hints)
-        case .openAIWhisper: return OpenAICompatibleASR.openAIWhisper(apiKey: apiKey, language: hints.singleLanguage)
+        case .openAIWhisper: return OpenAICompatibleASR.openAI(apiKey: apiKey, hints: hints)
         case .openRouter: return OpenAICompatibleASR.openRouter(apiKey: apiKey, language: hints.singleLanguage)
         case .soniox: return SonioxASR(apiKey: apiKey, hints: hints)
         case .assemblyAI: return AssemblyAIASR(apiKey: apiKey, hints: hints)
+        case .assemblyAIDictation: return AssemblyAIDictationASR(apiKey: apiKey, hints: hints)
         }
     }
 }
@@ -150,16 +160,21 @@ enum ASRProviderType: String, CaseIterable {
 enum ASRError: LocalizedError {
     case invalidResponse
     case networkError(String)
+    /// The request never reached the server (no network, DNS, refused), so nothing was
+    /// processed or billed and it's safe to send again.
+    case connectionFailed(String)
     case apiError(String)
     case invalidAPIKey
     case timeout
     case noTranscript
+    /// The connection dropped or the final result never came; this is what arrived before.
+    case incomplete(String)
 
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
             return String(localized: "服务返回了无法解析的响应")
-        case .networkError(let msg):
+        case .networkError(let msg), .connectionFailed(let msg):
             return String(localized: "网络错误：\(msg)")
         case .apiError(let msg):
             return String(localized: "API 错误：\(msg)")
@@ -169,6 +184,20 @@ enum ASRError: LocalizedError {
             return String(localized: "等待识别结果超时")
         case .noTranscript:
             return String(localized: "没有识别到语音")
+        case .incomplete:
+            return String(localized: "网络中断，识别结果可能不完整")
+        }
+    }
+}
+
+extension ASRError {
+    /// Classifies a URLSession error: `connectionFailed` when nothing reached the server.
+    static func from(_ error: Error) -> ASRError {
+        switch (error as? URLError)?.code {
+        case .cannotFindHost?, .cannotConnectToHost?, .dnsLookupFailed?, .notConnectedToInternet?:
+            return .connectionFailed(error.localizedDescription)
+        default:
+            return .networkError(error.localizedDescription)
         }
     }
 }
@@ -205,6 +234,31 @@ enum TranscriptJoiner {
         return String(result)
     }
 
+    /// Puts a space between Chinese and Latin letters or digits ("用OpenAI的API" → "用 OpenAI 的
+    /// API"), the style the polish prompt asks for. Used where that prompt doesn't run.
+    static func addingSpacesBetweenCJKAndLatin(_ text: String) -> String {
+        var result = String.UnicodeScalarView()
+        var previous: Unicode.Scalar?
+        for s in text.unicodeScalars {
+            if let p = previous, (isCJKLetter(p) && isLatinOrDigit(s)) || (isLatinOrDigit(p) && isCJKLetter(s)) {
+                result.append(" ")
+            }
+            result.append(s)
+            previous = s
+        }
+        return String(result)
+    }
+
+    /// Han characters only: CJK punctuation (，。) takes no space.
+    private static func isCJKLetter(_ s: Unicode.Scalar) -> Bool {
+        switch s.value {
+        case 0x3400...0x4DBF, 0x4E00...0x9FFF, 0xF900...0xFAFF:
+            return true
+        default:
+            return false
+        }
+    }
+
     private static func isCJK(_ s: Unicode.Scalar) -> Bool {
         switch s.value {
         case 0x3000...0x303F, 0x3400...0x4DBF, 0x4E00...0x9FFF, 0xF900...0xFAFF, 0xFF00...0xFFEF:
@@ -234,6 +288,7 @@ class BufferedASRSession: ASRSession {
     private let lock = NSLock()
     private var buffer = Data()
     private var isCancelled = false
+    private var isDelivered = false
     private var uploadTask: URLSessionTask?
 
     func start() {}
@@ -244,6 +299,14 @@ class BufferedASRSession: ASRSession {
         lock.unlock()
     }
 
+    /// Longest wait for the result after recording stops. Override for slower providers.
+    func resultDeadline(audioSeconds: Double) -> TimeInterval {
+        20 + audioSeconds * 0.3
+    }
+
+    /// Uploads off the main thread (encoding minutes of audio takes a moment), retries once
+    /// when the request couldn't reach the server so a blip doesn't lose the recording, and
+    /// gives up after `resultDeadline`.
     func finish(completion: @escaping (Result<String, Error>) -> Void) {
         lock.lock()
         let audio = buffer
@@ -252,20 +315,71 @@ class BufferedASRSession: ASRSession {
         lock.unlock()
         guard !cancelled else { return }
 
-        let task = upload(pcm: audio) { [weak self] result in
+        // Strong references throughout: the deadline bounds how long the session is kept.
+        let deliver: (Result<String, Error>) -> Void = { result in
+            guard self.claimDelivery() else { return }
             DispatchQueue.main.async {
-                guard let self = self, !self.isCancelledNow else { return }
+                guard !self.isCancelledNow else { return }
                 completion(result)
             }
         }
-        if let task = task { track(task) }
+        let deadline = Date().addingTimeInterval(resultDeadline(audioSeconds: Double(audio.count) / 32000))
+        DispatchQueue.global().asyncAfter(deadline: .now() + deadline.timeIntervalSinceNow) { [weak self] in
+            guard let self else { return }
+            self.currentTask?.cancel()
+            deliver(.failure(ASRError.timeout))
+        }
+        attempt(audio, retriesLeft: 1, deadline: deadline, deliver: deliver)
+    }
+
+    private func attempt(_ audio: Data, retriesLeft: Int, deadline: Date,
+                         deliver: @escaping (Result<String, Error>) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            guard !self.isFinishedNow else { return }
+            let task = self.upload(pcm: audio) { result in
+                // Only when nothing reached the server: a request that got there may have been
+                // processed (and billed) already.
+                if case .failure(ASRError.connectionFailed) = result, retriesLeft > 0,
+                   deadline.timeIntervalSinceNow > 5, !self.isFinishedNow {
+                    print("⚠️ Couldn't reach the server, retrying once")
+                    self.attempt(audio, retriesLeft: retriesLeft - 1, deadline: deadline, deliver: deliver)
+                    return
+                }
+                deliver(result)
+            }
+            if let task { self.track(task) }
+        }
     }
 
     /// Multi-step uploads register each request so `cancel()` stops whichever is running.
     func track(_ task: URLSessionTask) {
         lock.lock()
         uploadTask = task
+        let cancelled = isCancelled
         lock.unlock()
+        if cancelled { task.cancel() }
+    }
+
+    private var currentTask: URLSessionTask? {
+        lock.lock()
+        defer { lock.unlock() }
+        return uploadTask
+    }
+
+    private func claimDelivery() -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        if isDelivered { return false }
+        isDelivered = true
+        return true
+    }
+
+    /// Cancelled, or a result (or the deadline's timeout) was already delivered: multi-step
+    /// uploads should stop.
+    var isFinishedNow: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return isCancelled || isDelivered
     }
 
     func cancel() {
@@ -310,6 +424,8 @@ class WebSocketASRSession: NSObject, ASRSession, URLSessionWebSocketDelegate, UR
     private var isDone = false
     private var timeoutWork: DispatchWorkItem?
     private(set) var finishRequested = false
+    /// The handshake succeeded. A failure before that is a connection problem, never a result.
+    private var didOpen = false
 
     /// Seconds to wait for the final result after `finish` before giving up.
     var finishTimeout: TimeInterval { 10 }
@@ -369,7 +485,7 @@ class WebSocketASRSession: NSObject, ASRSession, URLSessionWebSocketDelegate, UR
             // Cancelled in teardown, so holding self here is bounded by the timeout.
             let work = DispatchWorkItem {
                 let text = self.currentTranscript()
-                self.deliver(text.isEmpty ? .failure(ASRError.timeout) : .success(text))
+                self.deliver(.failure(text.isEmpty ? ASRError.timeout : ASRError.incomplete(text)))
             }
             self.timeoutWork = work
             self.queue.asyncAfter(deadline: .now() + self.finishTimeout, execute: work)
@@ -455,11 +571,23 @@ class WebSocketASRSession: NSObject, ASRSession, URLSessionWebSocketDelegate, UR
     private func handleSocketError(_ error: Error) {
         if let response = socket?.response as? HTTPURLResponse, [401, 403].contains(response.statusCode) {
             fail(ASRError.invalidAPIKey)
-        } else if finishRequested {
-            // Some servers simply close after the last result.
-            complete()
+        } else if finishRequested && didOpen {
+            endAfterClose(socket?.closeCode, error: error)
         } else {
             fail(ASRError.networkError(error.localizedDescription))
+        }
+    }
+
+    /// Some servers simply close after the last result. Any other way of ending (no close
+    /// frame, an error code) may have cut off the end of what the user said.
+    private func endAfterClose(_ code: URLSessionWebSocketTask.CloseCode?, error: Error?) {
+        switch code {
+        case .normalClosure?, .goingAway?:
+            complete()
+        default:
+            let text = currentTranscript()
+            let detail = error?.localizedDescription ?? "code \(code?.rawValue ?? 0)"
+            deliver(.failure(text.isEmpty ? ASRError.networkError(detail) : ASRError.incomplete(text)))
         }
     }
 
@@ -485,13 +613,14 @@ class WebSocketASRSession: NSObject, ASRSession, URLSessionWebSocketDelegate, UR
     // MARK: URLSessionWebSocketDelegate
 
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
+        didOpen = true
         socketDidOpen()
     }
 
     func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask,
                     didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         if finishRequested {
-            complete()
+            endAfterClose(closeCode, error: nil)
         } else {
             let detail = reason.flatMap { String(data: $0, encoding: .utf8) } ?? "code \(closeCode.rawValue)"
             fail(ASRError.networkError(String(localized: "连接被服务器关闭（\(detail)）")))

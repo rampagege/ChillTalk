@@ -9,7 +9,7 @@ import Foundation
 final class SonioxASR: WebSocketASRSession {
     private let apiKey: String
     private let endpoint = "wss://stt-rt.soniox.com/transcribe-websocket"
-    private let model = "stt-rt-v5"
+    private let model = "stt-rt-v6"
     private let hints: RecognitionHints
 
     private var finalText = ""

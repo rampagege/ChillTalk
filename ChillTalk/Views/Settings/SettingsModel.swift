@@ -152,7 +152,7 @@ final class SettingsModel: ObservableObject {
         case .openAIWhisper: return \.openAIKey
         case .openRouter: return \.openRouterKey
         case .soniox: return \.sonioxKey
-        case .assemblyAI: return \.assemblyAIKey
+        case .assemblyAI, .assemblyAIDictation: return \.assemblyAIKey
         }
     }
 

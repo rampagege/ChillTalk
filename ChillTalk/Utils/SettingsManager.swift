@@ -186,16 +186,19 @@ enum PolishProvider: String, CaseIterable {
         let outputTokens = Double(characters)
         switch self {
         case .dashScope: return (inputTokens * 0.8 + outputTokens * 2.7) / 1_000_000        // qwen3.8-flash
-        case .openRouter: return (inputTokens * 0.15 + outputTokens * 0.6) * 7.1 / 1_000_000 // gpt-4o-mini
+        case .openRouter: return (inputTokens * 0.10 + outputTokens * 0.5) * 7.1 / 1_000_000 // claude-haiku-5.5
         }
     }
     
     var defaultModel: String {
         switch self {
         case .dashScope: return "qwen3.8-flash"
-        case .openRouter: return "openai/gpt-4o-mini"
+        case .openRouter: return "anthropic/claude-haiku-5.5"
         }
     }
+
+    /// Defaults this app used before, which settings may hold just from Settings being opened.
+    static let formerOpenRouterDefaults: Set<String> = ["openai/gpt-4o-mini"]
 }
 
 extension Notification.Name {
@@ -207,6 +210,10 @@ class SettingsManager {
     
     private let defaults = UserDefaults.standard
     private let keychainService = "com.chilltalk.app"
+    /// Keychain reads cost a few milliseconds each and several happen per dictation; keys only
+    /// change through `setKeychainValue`, so remembering them is safe.
+    private var keychainCache: [String: String] = [:]
+    private let keychainLock = NSLock()
     
     // Keys
     private enum Keys {
@@ -240,6 +247,19 @@ class SettingsManager {
     
     private init() {
         migrateQwenModelDefaults()
+        migrateOpenRouterPolishDefault()
+    }
+
+    /// The OpenRouter polish default moved from GPT-4o mini to Claude Haiku 5.5 (cheaper, better
+    /// at Chinese). A saved old default follows the new one.
+    private func migrateOpenRouterPolishDefault() {
+        let flag = "migratedOpenRouterHaiku55Default"
+        guard !defaults.bool(forKey: flag) else { return }
+        if let saved = defaults.string(forKey: Keys.openRouterModel),
+           PolishProvider.formerOpenRouterDefaults.contains(saved) {
+            defaults.removeObject(forKey: Keys.openRouterModel)
+        }
+        defaults.set(true, forKey: flag)
     }
 
     /// The defaults moved to Qwen-Audio 3.1. Settings still holding an old default (saved
@@ -285,7 +305,7 @@ class SettingsManager {
             return getKeychainValue(key: KeychainKeys.openRouterAPIKey) ?? ""
         case .soniox:
             return getSonioxAPIKey()
-        case .assemblyAI:
+        case .assemblyAI, .assemblyAIDictation:
             return getAssemblyAIAPIKey()
         }
     }
@@ -548,6 +568,18 @@ class SettingsManager {
     // MARK: - Keychain Helpers
     
     private func getKeychainValue(key: String) -> String? {
+        keychainLock.lock()
+        defer { keychainLock.unlock() }
+        if let cached = keychainCache[key] { return cached.isEmpty ? nil : cached }
+        let (value, status) = readKeychainValue(key: key)
+        // A denied prompt or a locked keychain may work next time; only remember real answers.
+        if status == errSecSuccess || status == errSecItemNotFound {
+            keychainCache[key] = value ?? ""
+        }
+        return value
+    }
+
+    private func readKeychainValue(key: String) -> (String?, OSStatus) {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: keychainService,
@@ -562,13 +594,16 @@ class SettingsManager {
         if status == errSecSuccess,
            let data = result as? Data,
            let value = String(data: data, encoding: .utf8) {
-            return value
+            return (value, status)
         }
         
-        return nil
+        return (nil, status)
     }
     
     private func setKeychainValue(key: String, value: String) {
+        keychainLock.lock()
+        keychainCache[key] = nil
+        keychainLock.unlock()
         // Delete existing
         let deleteQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -590,6 +625,9 @@ class SettingsManager {
         ]
         
         let status = SecItemAdd(addQuery as CFDictionary, nil)
+        keychainLock.lock()
+        keychainCache[key] = status == errSecSuccess ? value : nil
+        keychainLock.unlock()
         
         if status != errSecSuccess {
             print("❌ Failed to save to keychain: \(status)")

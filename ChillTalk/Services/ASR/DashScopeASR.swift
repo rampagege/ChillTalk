@@ -14,6 +14,9 @@ struct DashScopeASRModel: Identifiable {
     static let realtime: [DashScopeASRModel] = [
         DashScopeASRModel(id: "qwen-audio-3.1-asr-flash-streaming", mode: .realtime, yuanPerSecond: 0.00015,
                           note: String(localized: "推荐，最新版")),
+        // Same price as streaming (¥6 / ¥4.5 per million tokens in, out).
+        DashScopeASRModel(id: "qwen-audio-3.1-asr-flash-message", mode: .realtime, yuanPerSecond: 0.00015,
+                          note: String(localized: "为语音输入优化，延迟更低")),
         DashScopeASRModel(id: "qwen-audio-3.0-asr-flash-streaming", mode: .realtime, yuanPerSecond: 0.00033,
                           note: String(localized: "上一代")),
         DashScopeASRModel(id: "fun-asr-realtime", mode: .realtime, yuanPerSecond: 0.00033,
@@ -46,7 +49,10 @@ struct DashScopeASRModel: Identifiable {
 }
 
 /// Alibaba Cloud Model Studio (DashScope) realtime recognition over WebSocket
-/// (Qwen-Audio-ASR streaming / Fun-ASR realtime share this protocol).
+/// (Qwen-Audio-ASR streaming and message / Fun-ASR realtime share this protocol).
+///
+/// The `-message` model is tuned for short voice input (input methods, voice messages): lower
+/// latency, and it can drop fillers itself. It only sends final results unless asked.
 ///
 /// Protocol: connect → `run-task` → wait for `task-started` → stream binary PCM →
 /// `finish-task` → `result-generated`… → `task-finished`.
@@ -66,13 +72,18 @@ final class DashScopeASR: WebSocketASRSession {
 
     /// Hot words and context text from the user's vocabulary.
     private let hints: RecognitionHints
+    /// Let a model that can do it drop fillers and false starts (used when polish is off).
+    private let removeDisfluencies: Bool
     /// DashScope limit for context text per turn.
     static let maxContextLength = 400
 
-    init(apiKey: String, model: String, hints: RecognitionHints = .none) {
+    private var isMessageModel: Bool { model.hasSuffix("-message") }
+
+    init(apiKey: String, model: String, hints: RecognitionHints = .none, removeDisfluencies: Bool = false) {
         self.apiKey = apiKey
         self.model = model
         self.hints = hints
+        self.removeDisfluencies = removeDisfluencies
         super.init()
     }
 
@@ -93,14 +104,13 @@ final class DashScopeASR: WebSocketASRSession {
             parameters["vocabulary"] = hints.hotwords
         }
         parameters["language_hints"] = hints.languageCodes
-        var input: [String: Any] = [:]
-        let context = hints.context.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !context.isEmpty {
-            input["context"] = [[
-                "role": "user",
-                "content": [["type": "input_text", "text": String(context.prefix(Self.maxContextLength))]]
-            ]]
+        if isMessageModel {
+            parameters["intermediate_result_enabled"] = true    // live text in the HUD
+            parameters["vad_model"] = "near_meeting_16k"        // the speaker is close to the mic
+            if removeDisfluencies { parameters["disfluency_removal_enabled"] = true }
         }
+        var input: [String: Any] = [:]
+        if let context = Self.contextMessages(hints) { input["context"] = context }
         let runTask: [String: Any] = [
             "header": [
                 "action": "run-task",
@@ -117,6 +127,16 @@ final class DashScopeASR: WebSocketASRSession {
             ]
         ]
         sendJSON(runTask)
+    }
+
+    /// The user's background description in the shape the Qwen-Audio ASR APIs take, or nil.
+    static func contextMessages(_ hints: RecognitionHints) -> [[String: Any]]? {
+        let context = hints.context.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !context.isEmpty else { return nil }
+        return [[
+            "role": "user",
+            "content": [["type": "input_text", "text": String(context.prefix(maxContextLength))]]
+        ]]
     }
 
     override func sendAudio(_ pcm: Data) {
@@ -243,11 +263,12 @@ final class QwenBatchASR: BufferedASRSession {
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         let body = native ? nativeBody(audio: audio) : compatibleBody(audio: audio)
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        // Without this, every "/" in megabytes of base64 is escaped as "\/".
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: .withoutEscapingSlashes)
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                completion(.failure(ASRError.networkError(error.localizedDescription)))
+                completion(.failure(ASRError.from(error)))
                 return
             }
             // The native API answers silence with HTTP 400 ASR_RESPONSE_HAVE_NO_WORDS.
@@ -278,13 +299,7 @@ final class QwenBatchASR: BufferedASRSession {
         var input: [String: Any] = [
             "messages": [["role": "user", "content": [["type": "input_audio", "input_audio": ["data": audio]]]]]
         ]
-        let context = hints.context.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !context.isEmpty {
-            input["context"] = [[
-                "role": "user",
-                "content": [["type": "input_text", "text": String(context.prefix(DashScopeASR.maxContextLength))]]
-            ]]
-        }
+        if let context = DashScopeASR.contextMessages(hints) { input["context"] = context }
         var parameters: [String: Any] = ["format": "wav", "sample_rate": 16000]
         if !hints.hotwords.isEmpty { parameters["vocabulary"] = hints.hotwords }
         if !hints.languageCodes.isEmpty { parameters["language_hints"] = hints.languageCodes }

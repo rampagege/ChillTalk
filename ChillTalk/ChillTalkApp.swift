@@ -77,12 +77,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
     private var dictationID = UUID()
     private var asrSession: ASRSession?
+    /// Polish or correction request in flight, so Esc can stop it.
+    private var llmRequest: LLMPolish?
     /// Frontmost app when recording stopped; text is only pasted if it's still frontmost.
     private var targetAppPID: pid_t?
     /// Recorded in history once the final text is ready.
     private var currentRawText = ""
     private var currentAudioSeconds: TimeInterval = 0
     private var currentProvider: ASRProviderType = .dashScope
+    /// The recognition service already returned cleaned-up text for the current dictation.
+    private var currentPolishedByASR = false
     private var currentMode: RecognitionMode = .realtime
     /// The current dictation corrects the last insertion instead of inserting new text.
     private var isCorrecting = false
@@ -92,7 +96,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     private struct LastInsertion {
         var text: String
         let target: TextInserter.Target
-        let time: Date
         /// History record the text came from; corrections are saved onto it.
         let historyID: UUID?
         /// Nothing was typed or clicked in another app since, so the caret should still sit
@@ -135,9 +138,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             self?.handleEscape()
         }
         hotkeyManager.onUserInput = { [weak self] in
-            // The paste (and Backspaces) this app sends show up here too, shortly after.
-            guard let self, let last = self.lastInsertion, Date().timeIntervalSince(last.time) > 1 else { return }
-            self.lastInsertion?.isUntouched = false
+            // The paste and Backspaces this app sends are tagged and don't count.
+            self?.lastInsertion?.isUntouched = false
         }
 
         PermissionManager.shared.checkAllPermissions()
@@ -159,7 +161,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         )
 
         appState.$recordingState
-            .sink { [weak self] state in self?.updateHUD(state: state) }
+            .sink { [weak self] state in
+                self?.updateHUD(state: state)
+                // Esc cancels only while there's something to cancel, and then stays with us.
+                self?.hotkeyManager.capturesEscape = state == .recording || state == .processing
+            }
             .store(in: &cancellables)
     }
 
@@ -291,6 +297,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             }
         }
         session.start()
+        // Open the connection the polish or correction request will use while the user speaks.
+        if correcting || (settings.isPolishEnabled() && !provider.polishesItself) {
+            LLMPolish.preconnect(settings.getPolishProvider())
+        }
 
         audioCapture.voiceProcessingEnabled = settings.isVoiceProcessingEnabled()
         do {
@@ -336,20 +346,43 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             self.asrSession = nil
             switch result {
             case .success(let transcript):
-                print("📝 Transcript received (\(transcript.count) chars)")
-                self.currentRawText = transcript
-                // Traditional output first (ASR mostly emits Simplified), then fix known
-                // misrecognitions before polish sees the text.
-                let scripted = SettingsManager.shared.getDictationLanguage().normalizeScript(transcript)
-                let fixed = MainActor.assumeIsolated { VocabularyStore.shared.applyReplacements(to: scripted) }
-                if self.isCorrecting {
-                    self.correctLastInsertion(spoken: fixed, id: id)
-                } else {
-                    self.polishAndInsert(fixed, id: id)
-                }
+                let dictation = session as? AssemblyAIDictationASR
+                self.handleTranscript(transcript, id: id, verbatim: dictation?.verbatim,
+                                      polishedByASR: dictation != nil && dictation?.rewriteFailed == false)
+            case .failure(ASRError.incomplete(let partial)) where !self.isCorrecting:
+                // The connection dropped near the end: insert what arrived, and say so.
+                self.handleTranscript(partial, id: id, notice: String(localized: "网络中断，识别结果可能不完整"))
             case .failure(let error):
                 self.showError(String(localized: "转录失败：\(error.localizedDescription)"))
             }
+        }
+        // Copy the user's clipboard now, while recognition runs, not right before the paste.
+        textInserter.prepare()
+    }
+
+    /// `verbatim`: the words as spoken, when the provider cleaned up `transcript` itself
+    /// (`polishedByASR`).
+    private func handleTranscript(_ transcript: String, id: UUID, notice: String? = nil, verbatim: String? = nil,
+                                  polishedByASR: Bool = false) {
+        print("📝 Transcript received (\(transcript.count) chars)")
+        currentRawText = verbatim ?? transcript
+        let language = SettingsManager.shared.getDictationLanguage()
+        // A correction needs what was actually said: the cleanup resolves "不是 A，是 B" to "B",
+        // losing the word the correction is about.
+        currentPolishedByASR = polishedByASR && !isCorrecting
+        var transcript = isCorrecting ? (verbatim ?? transcript) : transcript
+        if currentPolishedByASR && language.usesPinyin {
+            // The provider's cleanup doesn't know the 中英文之间加空格 rule our polish applies.
+            transcript = TranscriptJoiner.addingSpacesBetweenCJKAndLatin(transcript)
+        }
+        // Traditional output first (ASR mostly emits Simplified), then fix known
+        // misrecognitions before polish sees the text.
+        let scripted = language.normalizeScript(transcript)
+        let fixed = MainActor.assumeIsolated { VocabularyStore.shared.applyReplacements(to: scripted) }
+        if isCorrecting {
+            correctLastInsertion(spoken: fixed, id: id)
+        } else {
+            polishAndInsert(fixed, id: id, notice: notice)
         }
     }
 
@@ -359,53 +392,74 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         audioCapture.stopRecording()
         asrSession?.cancel()
         asrSession = nil
+        llmRequest?.cancel()
+        llmRequest = nil
     }
 
-    private func polishAndInsert(_ text: String, id: UUID) {
+    /// `notice` (e.g. about an incomplete transcript) is shown after insertion.
+    private func polishAndInsert(_ text: String, id: UUID, notice: String? = nil) {
         let settings = SettingsManager.shared
-        guard settings.isPolishEnabled() else {
-            insertText(text, id: id)
+        // A provider that cleaned up the text itself has done the polish already; if its
+        // cleanup failed, ours runs instead.
+        guard settings.isPolishEnabled(), !currentPolishedByASR, LLMPolish.needsPolish(text) else {
+            if currentProvider.polishesItself && !currentPolishedByASR && !settings.isPolishEnabled() {
+                insertText(text, id: id, notice: Self.joined(notice, String(localized: "润色失败，已插入原文")))
+                return
+            }
+            insertText(text, id: id, notice: notice)
             return
         }
 
         let provider = settings.getPolishProvider()
         let polishKey = settings.getPolishAPIKey()
         guard !polishKey.isEmpty else {
-            insertText(text, id: id, notice: String(localized: "润色已开启但未配置\(provider.displayName)密钥，已插入原文"))
+            insertText(text, id: id, notice: Self.joined(notice, String(localized: "润色已开启但未配置\(provider.displayName)密钥，已插入原文")))
             return
         }
         let language = settings.getDictationLanguage()
         let polish = LLMPolish(provider: provider, apiKey: polishKey, model: settings.getPolishModel(), language: language)
         
-        runPolish(text, with: polish, id: id)
+        runPolish(text, with: polish, id: id, notice: notice)
     }
     
-    private func runPolish(_ text: String, with polish: LLMPolish, id: UUID) {
+    private func runPolish(_ text: String, with polish: LLMPolish, id: UUID, notice: String?) {
         let glossary = MainActor.assumeIsolated { VocabularyStore.shared.glossary() }
+        llmRequest = polish
         polish.polish(text: text, glossary: glossary) { [weak self] result in
             guard let self = self, self.dictationID == id else { return }
+            self.llmRequest = nil
             switch result {
-            case .success(let polished):
+            case .success(let polished) where LLMPolish.isPlausibleCleanup(of: text, polished):
                 // The model may slip back into Simplified characters.
                 let language = SettingsManager.shared.getDictationLanguage()
-                self.insertText(language.normalizeScript(polished), id: id, polishedWith: polish.provider)
+                self.insertText(language.normalizeScript(polished), id: id, notice: notice, polishedWith: polish.provider)
+            case .success:
+                // It answered, expanded or translated what was said instead of cleaning it up.
+                print("⚠️ Polish output rejected: too different from the transcript")
+                self.insertText(text, id: id, notice: Self.joined(notice, String(localized: "润色结果和原话差别太大，已插入原文")))
             case .failure(let error):
                 print("⚠️ Polish failed: \(error.localizedDescription)")
-                self.insertText(text, id: id, notice: String(localized: "润色失败，已插入原文"))
+                self.insertText(text, id: id, notice: Self.joined(notice, String(localized: "润色失败，已插入原文")))
             }
         }
+    }
+
+    private static func joined(_ notices: String?...) -> String? {
+        let parts = notices.compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: "；")
     }
     
     private func insertText(_ rawText: String, id: UUID, notice: String? = nil, polishedWith: PolishProvider? = nil) {
         guard dictationID == id else { return }
         let text = SettingsManager.shared.keepsTrailingPeriod() ? rawText : Self.removingTrailingPeriod(rawText)
         appState.lastTranscript = text
-        let historyID = recordHistory(finalText: text, polishedWith: polishedWith)
 
         textInserter.insert(text, expectedPID: targetAppPID) { [weak self] result in
             guard let self = self, self.dictationID == id else { return }
-            if case .success(.pasted) = result, let target = self.textInserter.currentTarget() {
-                self.lastInsertion = LastInsertion(text: text, target: target, time: Date(), historyID: historyID)
+            // Recorded after the paste so the history write doesn't hold up the text.
+            let historyID = self.recordHistory(finalText: text, polishedWith: polishedWith)
+            if case .success(.pasted) = result, let target = self.textInserter.lastInsertTarget {
+                self.lastInsertion = LastInsertion(text: text, target: target, historyID: historyID)
             } else {
                 // The text didn't land in a field (or it's unclear where): nothing to correct.
                 self.lastInsertion = nil
@@ -441,8 +495,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         let llm = LLMPolish(provider: provider, apiKey: settings.getPolishAPIKey(), model: settings.getPolishModel(), language: language)
         let glossary = MainActor.assumeIsolated { VocabularyStore.shared.glossary() }
 
+        llmRequest = llm
         llm.correct(previous: last.text, spoken: spoken, glossary: glossary) { [weak self] result in
             guard let self = self, self.dictationID == id else { return }
+            self.llmRequest = nil
             switch result {
             case .success(let correction):
                 var text = language.normalizeScript(correction.text)
@@ -478,7 +534,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             switch result {
             case .success(.replaced):
                 // A second correction edits the corrected text.
-                self.lastInsertion = LastInsertion(text: text, target: last.target, time: Date(), historyID: last.historyID)
+                self.lastInsertion = LastInsertion(text: text, target: last.target, historyID: last.historyID)
                 self.appState.recordingState = .idle
                 if let note {
                     RecordingHUDController.shared.flash(note, isError: false, duration: 3.5)
@@ -549,6 +605,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         let cost = currentAudioSeconds * currentProvider.estimatedYuanPerSecond(currentMode)
             + (polishedWith?.estimatedYuan(characters: currentRawText.count) ?? 0)
         let raw = currentRawText, seconds = currentAudioSeconds, provider = currentProvider.shortName
+        let polished = polishedWith != nil || currentPolishedByASR
         // The pipeline always runs on the main thread.
         return MainActor.assumeIsolated {
             HistoryStore.shared.record(
@@ -556,7 +613,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
                 finalText: finalText,
                 audioSeconds: seconds,
                 asrProvider: provider,
-                polished: polishedWith != nil,
+                polished: polished,
                 estimatedCostYuan: cost
             )
         }

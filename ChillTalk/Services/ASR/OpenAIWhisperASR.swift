@@ -6,25 +6,47 @@ final class OpenAICompatibleASR: BufferedASRSession {
     private let endpoint: URL
     private let apiKey: String
     private let model: String
-    private let language: String?
+    /// Form fields besides `file` and `model`. Arrays repeat the field with a `[]` suffix
+    /// (`keywords[]`), the same way OpenAI's own clients send them.
+    private let fields: [(name: String, value: String)]
     private let extraHeaders: [String: String]
 
-    init(endpoint: URL, apiKey: String, model: String, language: String?, extraHeaders: [String: String] = [:]) {
+    init(endpoint: URL, apiKey: String, model: String, fields: [(name: String, value: String)],
+         extraHeaders: [String: String] = [:]) {
         self.endpoint = endpoint
         self.apiKey = apiKey
         self.model = model
-        self.language = language
+        self.fields = fields
         self.extraHeaders = extraHeaders
     }
 
-    /// `language` nil lets Whisper auto-detect (needed for mixed-language speech).
-    static func openAIWhisper(apiKey: String, language: String?) -> OpenAICompatibleASR {
-        OpenAICompatibleASR(
+    /// GPT-Transcribe ($0.0045/min): takes the background text as `prompt`, vocabulary terms as
+    /// `keywords` and every language the user speaks as `languages`, so mixed speech isn't forced
+    /// into one language.
+    static func openAI(apiKey: String, hints: RecognitionHints) -> OpenAICompatibleASR {
+        var fields: [(name: String, value: String)] = [("response_format", "json")]
+        let context = hints.context.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !context.isEmpty { fields.append(("prompt", context)) }
+        for term in keywords(from: hints.hotwords) { fields.append(("keywords[]", term)) }
+        var languages = [hints.language.whisperCode]
+        if hints.mixEnglish && hints.language != .en { languages.append("en") }
+        for code in languages { fields.append(("languages[]", code)) }
+        return OpenAICompatibleASR(
             endpoint: URL(string: "https://api.openai.com/v1/audio/transcriptions")!,
             apiKey: apiKey,
-            model: "whisper-1",
-            language: language
+            model: "gpt-transcribe",
+            fields: fields
         )
+    }
+
+    /// Strongest terms first. Keywords must be single lines without angle brackets.
+    static let maxKeywords = 100
+    private static func keywords(from hotwords: [String: Int]) -> [String] {
+        hotwords.sorted { $0.value > $1.value }
+            .map { $0.key.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty && !$0.contains(where: { $0.isNewline || $0 == "<" || $0 == ">" }) }
+            .prefix(maxKeywords)
+            .map { $0 }
     }
 
     override func upload(pcm: Data, completion: @escaping (Result<String, Error>) -> Void) -> URLSessionTask? {
@@ -49,13 +71,13 @@ final class OpenAICompatibleASR: BufferedASRSession {
         body.append(WAVEncoder.wav(fromPCM: pcm))
         body.append(Data("\r\n".utf8))
         appendField("model", model)
-        if let language = language { appendField("language", language) }
+        for field in fields { appendField(field.name, field.value) }
         body.append(Data("--\(boundary)--\r\n".utf8))
         request.httpBody = body
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
-                completion(.failure(ASRError.networkError(error.localizedDescription)))
+                completion(.failure(ASRError.from(error)))
                 return
             }
             if let httpError = HTTPResponseCheck.error(for: response, data: data) {

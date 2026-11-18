@@ -162,7 +162,7 @@ struct ASRPage: View {
         case .openAIWhisper: return "openAIKey"
         case .openRouter: return "openRouterKey"
         case .soniox: return "sonioxKey"
-        case .assemblyAI: return "assemblyAIKey"
+        case .assemblyAI, .assemblyAIDictation: return "assemblyAIKey"
         }
     }
 
@@ -172,7 +172,7 @@ struct ASRPage: View {
         case .deepgram: return "Deepgram API Key"
         case .openRouter: return "sk-or-v1-..."
         case .soniox: return "Soniox API Key"
-        case .assemblyAI: return "AssemblyAI API Key"
+        case .assemblyAI, .assemblyAIDictation: return "AssemblyAI API Key"
         }
     }
 
@@ -180,6 +180,7 @@ struct ASRPage: View {
         switch model.asrProvider {
         case .dashScope: return String(localized: "同一个密钥也可用于文字润色")
         case .openRouter: return String(localized: "与 OpenRouter 润色共用")
+        case .assemblyAI, .assemblyAIDictation: return String(localized: "AssemblyAI 实时、说完再识别和 Dictation 共用")
         default: return nil
         }
     }
@@ -191,7 +192,7 @@ struct ASRPage: View {
         case .openAIWhisper: return URL(string: "https://platform.openai.com/api-keys")!
         case .openRouter: return URL(string: "https://openrouter.ai/keys")!
         case .soniox: return URL(string: "https://console.soniox.com/")!
-        case .assemblyAI: return URL(string: "https://www.assemblyai.com/dashboard")!
+        case .assemblyAI, .assemblyAIDictation: return URL(string: "https://www.assemblyai.com/dashboard")!
         }
     }
 
@@ -255,18 +256,22 @@ struct ASRPage: View {
         switch model.asrProvider {
         case .dashScope: return String(localized: "实时流式")
         case .deepgram: return String(localized: "实时流式 · 普通话（zh-CN）")
-        case .openAIWhisper: return String(localized: "说完后整段上传")
-        case .openRouter: return String(localized: "实验性 · 说完后整段上传")
+        case .openAIWhisper: return String(localized: "说完后整段上传 · GPT-Transcribe · 约 $0.27/小时")
+        case .openRouter: return String(localized: "实验性 · 说完后整段上传 · Qwen3-ASR · 约 $0.03/小时")
         case .soniox: return String(localized: "实时流式 · 约 ¥0.85/小时 · 服务在国外")
-        case .assemblyAI: return String(localized: "实时流式 · 约 $0.45/小时 · 新用户送 $50 · 服务在国外")
+        case .assemblyAI: return String(localized: "实时流式 · 约 $0.30/小时 · 新用户送 $50 · 服务在国外")
+        case .assemblyAIDictation: return String(localized: "说完后识别并润色 · 约 $0.62/小时 · 不再另调润色 · 服务在国外")
         }
     }
 
     private var testDetail: String {
+        if model.asrProvider == .dashScope && effectiveMode == .batch {
+            return String(localized: "识别半秒静音，确认密钥和模型可用")
+        }
         switch model.asrProvider {
         case .dashScope: return String(localized: "会建立一次识别任务并立即结束，不上传音频")
         case .deepgram: return String(localized: "会建立一次连接并立即断开")
-        case .openAIWhisper, .openRouter: return String(localized: "验证密钥是否有效")
+        case .openAIWhisper, .openRouter, .assemblyAIDictation: return String(localized: "识别半秒静音，确认密钥和模型可用")
         case .soniox, .assemblyAI: return String(localized: "会建立一次连接并立即结束，不上传音频")
         }
     }

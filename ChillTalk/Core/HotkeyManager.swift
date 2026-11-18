@@ -1,5 +1,6 @@
 import Carbon
 import Cocoa
+import os
 
 /// Global hotkeys: one starts dictation, an optional second one corrects the last insertion.
 ///
@@ -10,6 +11,10 @@ import Cocoa
 ///
 /// Also reports Esc presses so the app can cancel an in-progress dictation, and any typing or
 /// clicking in other apps so the app knows the last insertion may have been edited.
+///
+/// While `capturesEscape` is on, an event tap takes Esc so it cancels the dictation without
+/// also reaching the app the user is typing in (closing its dialog, leaving vim's insert mode).
+/// Otherwise nothing is intercepted.
 final class HotkeyManager {
     enum Action: UInt32 {
         case dictate = 1
@@ -17,7 +22,17 @@ final class HotkeyManager {
     }
 
     var onHotkeyPressed: ((Action) -> Void)?
+    /// Called on the main queue.
     var onEscapePressed: (() -> Void)?
+
+    /// Turn on while a dictation is in progress (main thread).
+    var capturesEscape = false {
+        didSet {
+            guard capturesEscape != oldValue else { return }
+            escapeState.withLock { $0.capturing = capturesEscape }
+            updateEscapeTap()
+        }
+    }
     /// A key press or click that went to another app.
     var onUserInput: (() -> Void)?
 
@@ -33,6 +48,17 @@ final class HotkeyManager {
     private var heldModifier: Int?
     private var isTapCandidate = false
 
+    // Esc event tap. Its callback runs on a thread of its own, so a busy main thread can never
+    // hold up the user's typing while the tap is on.
+    private var escapeTap: CFMachPort?
+    private struct EscapeState {
+        var capturing = false
+        /// A captured Esc is still held down: its repeats and key-up are swallowed too, even
+        /// after the cancel turned capturing off, so none of it reaches the other app.
+        var holding = false
+    }
+    private let escapeState = OSAllocatedUnfairLock(initialState: EscapeState())
+
     init() {
         installMonitors()
     }
@@ -40,6 +66,7 @@ final class HotkeyManager {
     deinit {
         unregisterAll()
         monitors.forEach { NSEvent.removeMonitor($0) }
+        if let escapeTap { CFMachPortInvalidate(escapeTap) }
     }
 
     /// Returns false if the combo is already taken by another app or the system.
@@ -80,7 +107,7 @@ final class HotkeyManager {
         let mask: NSEvent.EventTypeMask = [.flagsChanged, .keyDown, .leftMouseDown, .rightMouseDown, .otherMouseDown]
         if let global = NSEvent.addGlobalMonitorForEvents(matching: mask, handler: { [weak self] event in
             self?.handle(event)
-            if event.type != .flagsChanged { self?.onUserInput?() }
+            if event.type != .flagsChanged, !TextInserter.isOwnEvent(event) { self?.onUserInput?() }
         }) {
             monitors.append(global)
         }
@@ -158,6 +185,99 @@ final class HotkeyManager {
         case kVK_Command, kVK_RightCommand: return .command
         case kVK_Option, kVK_RightOption: return .option
         default: return []
+        }
+    }
+
+    // MARK: - Esc capture
+
+    private func updateEscapeTap() {
+        if capturesEscape {
+            // Created on first use, and retried later if Accessibility wasn't granted yet. Without
+            // a tap, the event monitors still report Esc; it just reaches the other app too.
+            if escapeTap == nil { escapeTap = makeEscapeTap() }
+            if let escapeTap { CGEvent.tapEnable(tap: escapeTap, enable: true) }
+        } else if let escapeTap, !escapeState.withLock({ $0.holding }) {
+            // While a captured Esc is held, the tap thread turns the tap off at its key-up.
+            CGEvent.tapEnable(tap: escapeTap, enable: false)
+        }
+    }
+
+    private func makeEscapeTap() -> CFMachPort? {
+        let mask = CGEventMask(1 << CGEventType.keyDown.rawValue) | CGEventMask(1 << CGEventType.keyUp.rawValue)
+        let callback: CGEventTapCallBack = { _, type, event, userInfo in
+            guard let userInfo else { return Unmanaged.passUnretained(event) }
+            let manager = Unmanaged<HotkeyManager>.fromOpaque(userInfo).takeUnretainedValue()
+            return manager.handleTapEvent(type: type, event: event)
+        }
+        guard let tap = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap,
+                                          eventsOfInterest: mask, callback: callback,
+                                          userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
+            print("⚠️ Couldn't create the Esc event tap (Accessibility not granted?)")
+            return nil
+        }
+        let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
+        let thread = Thread {
+            CFRunLoopAddSource(CFRunLoopGetCurrent(), source, .commonModes)
+            CFRunLoopRun()
+        }
+        thread.name = "ChillTalk Esc tap"
+        thread.qualityOfService = .userInteractive
+        thread.start()
+        return tap
+    }
+
+    /// Runs on the tap's thread: decide fast, do the work on the main queue.
+    private func handleTapEvent(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
+        let pass = Unmanaged.passUnretained(event)
+        switch type {
+        case .tapDisabledByTimeout, .tapDisabledByUserInput:
+            let state = escapeState.withLock { $0 }
+            if state.capturing || state.holding, let escapeTap { CGEvent.tapEnable(tap: escapeTap, enable: true) }
+            return pass
+        case .keyDown, .keyUp:
+            guard event.getIntegerValueField(.keyboardEventKeycode) == Int64(kVK_Escape) else { return pass }
+            let isRepeat = event.getIntegerValueField(.keyboardEventAutorepeat) != 0
+            // Plain Esc only: ⌘/⌥/⌃ + Esc are other shortcuts (⌥⌘Esc is Force Quit).
+            let isPlain = event.flags.intersection([.maskCommand, .maskAlternate, .maskControl]).isEmpty
+            enum Decision { case pass, passAndStop, swallow, cancel, release }
+            let decision: Decision = escapeState.withLock { state in
+                if type == .keyUp {
+                    guard state.holding else { return .pass }
+                    state.holding = false
+                    return state.capturing ? .swallow : .release
+                }
+                if state.capturing && isPlain && !isRepeat {
+                    state.holding = true
+                    return .cancel
+                }
+                // Repeats of a captured press; a fresh press after capture ended goes through
+                // (and clears a key-up that never arrived).
+                if state.holding && (isRepeat || state.capturing) { return .swallow }
+                if state.holding {
+                    // The key-up never arrived; this is a new press after capture ended.
+                    state.holding = false
+                    return .passAndStop
+                }
+                return .pass
+            }
+            switch decision {
+            case .pass:
+                return pass
+            case .passAndStop:
+                if let escapeTap { CGEvent.tapEnable(tap: escapeTap, enable: false) }
+                return pass
+            case .swallow:
+                return nil
+            case .cancel:
+                DispatchQueue.main.async { self.onEscapePressed?() }
+                return nil
+            case .release:
+                // The press is over and nothing is being captured: stop intercepting.
+                if let escapeTap { CGEvent.tapEnable(tap: escapeTap, enable: false) }
+                return nil
+            }
+        default:
+            return pass
         }
     }
 
