@@ -3361,40 +3361,6 @@
         }
       }
     },
-    "实时流式 · 约 ¥0.85/小时 · 服务在国外": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Real-time streaming · about CN¥0.85/hour · hosted outside China"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "リアルタイムストリーミング · 約 0.85 人民元/時間 · 海外のサービス"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "실시간 스트리밍 · 시간당 약 0.85위안 · 해외 서비스"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "实时流式 · 约 ¥0.85/小时 · 服务在国外"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "即時串流 · 約人民幣 0.85 元/小時 · 服務位於海外"
-          }
-        }
-      }
-    },
     "导入 %lld 行，新增 %lld 个词": {
       "localizations": {
         "en": {
@@ -9243,40 +9209,6 @@
         }
       }
     },
-    "说完再识别 · 约 $0.26/小时 · 新用户送 $50 · 服务在国外": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "After you finish · about $0.26/hour · $50 free for new users · hosted outside China"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "話し終えてから認識 · 約 $0.26/時間 · 新規ユーザーは $50 分無料 · 海外のサービス"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "말을 마친 후 인식 · 시간당 약 $0.26 · 신규 사용자 $50 무료 · 해외 서비스"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "说完再识别 · 约 $0.26/小时 · 新用户送 $50 · 服务在国外"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "說完再辨識 · 約 $0.26/小時 · 新使用者送 $50 · 服務位於海外"
-          }
-        }
-      }
-    },
     "方言和口音覆盖更广": {
       "localizations": {
         "en": {
@@ -10501,40 +10433,6 @@
         }
       }
     },
-    "实时流式 · 约 $0.30/小时 · 新用户送 $50 · 服务在国外": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Real-time streaming · about $0.30/hour · $50 free for new users · hosted outside China"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "リアルタイムストリーミング · 約 $0.30/時間 · 新規ユーザーは $50 分無料 · 海外のサービス"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "실시간 스트리밍 · 시간당 약 $0.30 · 신규 사용자 $50 무료 · 해외 서비스"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "实时流式 · 约 $0.30/小时 · 新用户送 $50 · 服务在国外"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "即時串流 · 約 $0.30/小時 · 新使用者送 $50 · 服務位於海外"
-          }
-        }
-      }
-    },
     "说完后整段上传 · GPT-Transcribe · 约 $0.27/小时": {
       "localizations": {
         "en": {
@@ -10841,40 +10739,6 @@
         }
       }
     },
-    "说完后识别并润色 · 约 $0.62/小时 · 不再另调润色 · 服务在国外": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Transcribes and polishes when you finish · about $0.62/hour · no separate polish call · hosted outside China"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "話し終えてから認識と整形 · 約 $0.62/時間 · 別途の整形呼び出しなし · 海外のサービス"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "말을 마친 후 인식 및 다듬기 · 시간당 약 $0.62 · 별도 다듬기 호출 없음 · 해외 서비스"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "说完后识别并润色 · 约 $0.62/小时 · 不再另调润色 · 服务在国外"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "說完後辨識並潤飾 · 約 $0.62/小時 · 不再另外呼叫潤飾 · 服務位於海外"
-          }
-        }
-      }
-    },
     "当前识别服务 AssemblyAI Dictation 已自带润色，插入文字时不再调用这里的服务；「纠正上一句」仍然使用它。": {
       "localizations": {
         "en": {
@@ -10939,6 +10803,142 @@
           "stringUnit": {
             "state": "translated",
             "value": "AssemblyAI Dictation（說完出字 · 內建潤飾）"
+          }
+        }
+      }
+    },
+    "说完再识别 · 约 $0.26/小时 · 新用户送 $50 · 服务在美国": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "After you finish · about $0.26/hour · $50 free for new users · hosted in the US"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "話し終えてから認識 · 約 $0.26/時間 · 新規ユーザーは $50 分無料 · サーバーは米国"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말을 마친 후 인식 · 시간당 약 $0.26 · 신규 사용자 $50 무료 · 미국 서버"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "说完再识别 · 约 $0.26/小时 · 新用户送 $50 · 服务在美国"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "說完再辨識 · 約 $0.26/小時 · 新使用者送 $50 · 服務位於美國"
+          }
+        }
+      }
+    },
+    "实时流式 · 约 $0.12/小时 · 服务在美国": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-time streaming · about $0.12/hour · hosted in the US"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リアルタイムストリーミング · 約 $0.12/時間 · サーバーは米国"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실시간 스트리밍 · 시간당 약 $0.12 · 미국 서버"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实时流式 · 约 $0.12/小时 · 服务在美国"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即時串流 · 約 $0.12/小時 · 服務位於美國"
+          }
+        }
+      }
+    },
+    "实时流式 · 约 $0.30/小时 · 新用户送 $50 · 服务在美国": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Real-time streaming · about $0.30/hour · $50 free for new users · hosted in the US"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "リアルタイムストリーミング · 約 $0.30/時間 · 新規ユーザーは $50 分無料 · サーバーは米国"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "실시간 스트리밍 · 시간당 약 $0.30 · 신규 사용자 $50 무료 · 미국 서버"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实时流式 · 约 $0.30/小时 · 新用户送 $50 · 服务在美国"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即時串流 · 約 $0.30/小時 · 新使用者送 $50 · 服務位於美國"
+          }
+        }
+      }
+    },
+    "说完后识别并润色 · 约 $0.62/小时 · 不再另调润色 · 服务在美国或欧盟": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transcribes and polishes when you finish · about $0.62/hour · no separate polish call · hosted in the US or EU"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "話し終えてから認識と整形 · 約 $0.62/時間 · 別途の整形呼び出しなし · サーバーは米国または EU"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "말을 마친 후 인식 및 다듬기 · 시간당 약 $0.62 · 별도 다듬기 호출 없음 · 미국 또는 EU 서버"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "说完后识别并润色 · 约 $0.62/小时 · 不再另调润色 · 服务在美国或欧盟"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "說完後辨識並潤飾 · 約 $0.62/小時 · 不再另外呼叫潤飾 · 服務位於美國或歐盟"
           }
         }
       }

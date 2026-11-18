@@ -250,7 +250,7 @@ struct ASRPage: View {
     private var providerNote: String {
         switch (model.asrProvider, effectiveMode) {
         case (.dashScope, .batch): return String(localized: "说完再识别 · 最长 5 分钟")
-        case (.assemblyAI, .batch): return String(localized: "说完再识别 · 约 $0.26/小时 · 新用户送 $50 · 服务在国外")
+        case (.assemblyAI, .batch): return String(localized: "说完再识别 · 约 $0.26/小时 · 新用户送 $50 · 服务在美国")
         default: break
         }
         switch model.asrProvider {
@@ -258,9 +258,9 @@ struct ASRPage: View {
         case .deepgram: return String(localized: "实时流式 · 普通话（zh-CN）")
         case .openAIWhisper: return String(localized: "说完后整段上传 · GPT-Transcribe · 约 $0.27/小时")
         case .openRouter: return String(localized: "实验性 · 说完后整段上传 · Qwen3-ASR · 约 $0.03/小时")
-        case .soniox: return String(localized: "实时流式 · 约 ¥0.85/小时 · 服务在国外")
-        case .assemblyAI: return String(localized: "实时流式 · 约 $0.30/小时 · 新用户送 $50 · 服务在国外")
-        case .assemblyAIDictation: return String(localized: "说完后识别并润色 · 约 $0.62/小时 · 不再另调润色 · 服务在国外")
+        case .soniox: return String(localized: "实时流式 · 约 $0.12/小时 · 服务在美国")
+        case .assemblyAI: return String(localized: "实时流式 · 约 $0.30/小时 · 新用户送 $50 · 服务在美国")
+        case .assemblyAIDictation: return String(localized: "说完后识别并润色 · 约 $0.62/小时 · 不再另调润色 · 服务在美国或欧盟")
         }
     }
 
