@@ -15,6 +15,9 @@ TAG="v$VERSION"
 
 cd "$(dirname "$0")/.."
 [[ -z "$(git status --porcelain --untracked-files=no -- ChillTalk ChillTalk.xcodeproj)" ]] || { echo "✗ Commit your changes first"; exit 1; }
+# Keep the project's version in step, so builds from Xcode or install.sh show the same number.
+PROJECT_VERSION="$(sed -nE 's/.*MARKETING_VERSION = ([^;]+);.*/\1/p' ChillTalk.xcodeproj/project.pbxproj | head -1)"
+[[ "$PROJECT_VERSION" == "$VERSION" ]] || { echo "✗ Project version is $PROJECT_VERSION: set MARKETING_VERSION to $VERSION in ChillTalk.xcodeproj and commit first"; exit 1; }
 
 WORK="$(mktemp -d)"
 BUILD_NUMBER="$(git rev-list --count HEAD)"
