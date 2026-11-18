@@ -160,10 +160,8 @@ final class AudioCapture {
         guard input.isVoiceProcessingEnabled != enabled else { return }
         try input.setVoiceProcessingEnabled(enabled)
         if enabled {
-            if #available(macOS 14.0, *) {
-                input.voiceProcessingOtherAudioDuckingConfiguration =
-                    AVAudioVoiceProcessingOtherAudioDuckingConfiguration(enableAdvancedDucking: false, duckingLevel: .min)
-            }
+            input.voiceProcessingOtherAudioDuckingConfiguration =
+                AVAudioVoiceProcessingOtherAudioDuckingConfiguration(enableAdvancedDucking: false, duckingLevel: .min)
             // The voice-processing unit drives input and output together.
             _ = engine.outputNode
         }

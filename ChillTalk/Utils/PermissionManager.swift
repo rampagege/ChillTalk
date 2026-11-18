@@ -17,12 +17,7 @@ class PermissionManager {
     // MARK: - Microphone Permission
     
     func hasMicrophonePermission() -> Bool {
-        if #available(macOS 14.0, *) {
-            return AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
-        } else {
-            let status = AVCaptureDevice.authorizationStatus(for: .audio)
-            return status == .authorized
-        }
+        AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
     }
     
     @discardableResult
@@ -113,18 +108,8 @@ class PermissionManager {
     // MARK: - Open System Preferences
     
     private func openSystemPreferences(pane: String) {
-        // macOS 13+ uses System Settings
-        if #available(macOS 13.0, *) {
-            let urlString = "x-apple.systempreferences:com.apple.preference.security?\(pane)"
-            if let url = URL(string: urlString) {
-                NSWorkspace.shared.open(url)
-            }
-        } else {
-            // macOS 12 and earlier use System Preferences
-            let urlString = "x-apple.systempreferences:com.apple.preference.security?\(pane)"
-            if let url = URL(string: urlString) {
-                NSWorkspace.shared.open(url)
-            }
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?\(pane)") {
+            NSWorkspace.shared.open(url)
         }
     }
 }

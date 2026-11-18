@@ -108,9 +108,7 @@ class RecordingHUDController: ObservableObject {
     private func createWindow() {
         let hostingView = DraggableHostingView(rootView: RecordingHUDView().environmentObject(self))
         hostingView.frame = NSRect(origin: .zero, size: Self.panelSize)
-        if #available(macOS 13.0, *) {
-            hostingView.sizingOptions = []
-        }
+        hostingView.sizingOptions = []
 
         let panel = NSPanel(
             contentRect: NSRect(origin: .zero, size: Self.panelSize),
