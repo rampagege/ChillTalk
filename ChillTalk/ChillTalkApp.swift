@@ -87,6 +87,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
     private var hotkeyManager: HotkeyManager!
     private let audioCapture = AudioCapture()
     private let textInserter = TextInserter()
+    private let recordingLimits = RecordingLimits()
     private var cancellables = Set<AnyCancellable>()
 
     private var dictationID = UUID()
@@ -141,8 +142,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             SyncService.shared.start()
         }
 
-        audioCapture.onAudioLevel = { level in
+        audioCapture.onAudioLevel = { [recordingLimits = self.recordingLimits] level in
             RecordingHUDController.shared.updateAudioLevel(level)
+            recordingLimits.add(level: level)
+        }
+        recordingLimits.onCountdown = { seconds in
+            RecordingHUDController.shared.secondsLeft = seconds
+        }
+        recordingLimits.onLimit = { [weak self] reason in
+            self?.handleRecordingLimit(reason)
         }
         audioCapture.onError = { [weak self] error in
             guard let self = self, self.appState.recordingState == .recording else { return }
@@ -252,6 +260,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         }
     }
 
+    /// A recording nobody seems to be using ended on its own (see `RecordingLimits`).
+    private func handleRecordingLimit(_ reason: RecordingLimits.Reason) {
+        guard appState.recordingState == .recording else { return }
+        switch reason {
+        case .noSpeech:
+            cancelDictation()
+            appState.recordingState = .idle
+            RecordingHUDController.shared.flash(String(localized: "没听到说话，已取消录音"), isError: false)
+        case .silence:
+            stopRecording(notice: String(localized: "1 分钟没有说话，已自动结束录音"))
+        case .maxDuration:
+            stopRecording(notice: String(localized: "已达到最长录音时间，已自动结束"))
+        }
+    }
+
     private func handleEscape() {
         switch appState.recordingState {
         case .recording, .processing:
@@ -337,10 +360,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         isCorrecting = correcting
         RecordingHUDController.shared.isCorrecting = correcting
         appState.recordingState = .recording
+        recordingLimits.start(maxDuration: min(RecordingLimits.maxDuration, provider.maxRecordingSeconds(mode) ?? .infinity))
     }
 
 
-    private func stopRecording() {
+    /// `notice` (e.g. why the recording stopped on its own) is shown after insertion.
+    private func stopRecording(notice: String? = nil) {
+        recordingLimits.stop()
         let duration = audioCapture.stopRecording()
 
         guard let session = asrSession else {
@@ -367,11 +393,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
             switch result {
             case .success(let transcript):
                 let dictation = session as? AssemblyAIDictationASR
-                self.handleTranscript(transcript, id: id, verbatim: dictation?.verbatim,
+                self.handleTranscript(transcript, id: id, notice: notice, verbatim: dictation?.verbatim,
                                       polishedByASR: dictation != nil && dictation?.rewriteFailed == false)
             case .failure(ASRError.incomplete(let partial)) where !self.isCorrecting:
                 // The connection dropped near the end: insert what arrived, and say so.
-                self.handleTranscript(partial, id: id, notice: String(localized: "网络中断，识别结果可能不完整"))
+                self.handleTranscript(partial, id: id,
+                                      notice: Self.joined(notice, String(localized: "网络中断，识别结果可能不完整")))
             case .failure(let error):
                 self.showError(String(localized: "转录失败：\(error.localizedDescription)"))
             }
@@ -408,6 +435,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
 
     /// Stops whatever is in flight. Callbacks from the cancelled dictation are ignored.
     private func cancelDictation() {
+        recordingLimits.stop()
         dictationID = UUID()
         audioCapture.stopRecording()
         asrSession?.cancel()

@@ -95,6 +95,12 @@ enum ASRProviderType: String, CaseIterable {
     /// The provider returns cleaned-up text itself, so ChillTalk's polish is skipped.
     var polishesItself: Bool { self == .assemblyAIDictation }
 
+    /// The longest recording the service takes in one request, if it has a limit.
+    func maxRecordingSeconds(_ mode: RecognitionMode) -> TimeInterval? {
+        if case (.dashScope, .batch) = (self, effectiveMode(mode)) { return QwenBatchASR.maxSeconds }
+        return nil
+    }
+
     /// The preferred mode if this provider supports it, otherwise the one it does.
     func effectiveMode(_ preferred: RecognitionMode) -> RecognitionMode {
         switch preferred {

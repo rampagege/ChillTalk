@@ -29,6 +29,8 @@ class RecordingHUDController: ObservableObject {
     @Published var message: String = ""
     @Published var liveTranscript: String = ""
     @Published var audioLevel: Double = 0.0
+    /// Seconds before the recording stops at its length limit, shown near the end.
+    @Published var secondsLeft: Int?
     /// The dictation is a spoken correction of the last insertion.
     @Published var isCorrecting = false
 
@@ -41,6 +43,7 @@ class RecordingHUDController: ObservableObject {
         case .recording:
             mode = .recording
             liveTranscript = ""
+            secondsLeft = nil
         case .processing:
             // Keep the transcript on screen while the final result is prepared.
             mode = .processing
@@ -90,6 +93,7 @@ class RecordingHUDController: ObservableObject {
         isVisible = false
         liveTranscript = ""
         audioLevel = 0.0
+        secondsLeft = nil
         window?.orderOut(nil)
     }
 
@@ -290,7 +294,9 @@ struct RecordingHUDView: View {
     private var hintText: String? {
         switch controller.mode {
         case .recording:
-            return controller.isCorrecting ? String(localized: "纠正上一句 · 再按快捷键结束 · Esc 取消") : String(localized: "再按快捷键结束 · Esc 取消")
+            let hint = controller.isCorrecting ? String(localized: "纠正上一句 · 再按快捷键结束 · Esc 取消") : String(localized: "再按快捷键结束 · Esc 取消")
+            guard let seconds = controller.secondsLeft else { return hint }
+            return String(localized: "\(seconds) 秒后自动结束") + " · " + hint
         case .processing:
             guard !controller.liveTranscript.isEmpty else { return nil }
             return controller.isCorrecting ? String(localized: "正在修改上一句… · Esc 取消") : String(localized: "处理中… · Esc 取消")

@@ -10,6 +10,7 @@
 		AA0001 /* ChillTalkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000 /* ChillTalkApp.swift */; };
 		AA0003 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0002 /* AppState.swift */; };
 		AA0005 /* AudioCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0004 /* AudioCapture.swift */; };
+		AA0431 /* RecordingLimits.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0430 /* RecordingLimits.swift */; };
 		AA0007 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0006 /* HotkeyManager.swift */; };
 		AA0009 /* TextInserter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0008 /* TextInserter.swift */; };
 		AA0011 /* ASRProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0010 /* ASRProvider.swift */; };
@@ -53,6 +54,7 @@
 		AA0000 /* ChillTalkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChillTalkApp.swift; sourceTree = "<group>"; };
 		AA0002 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		AA0004 /* AudioCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioCapture.swift; sourceTree = "<group>"; };
+		AA0430 /* RecordingLimits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingLimits.swift; sourceTree = "<group>"; };
 		AA0006 /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
 		AA0008 /* TextInserter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextInserter.swift; sourceTree = "<group>"; };
 		AA0010 /* ASRProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASRProvider.swift; sourceTree = "<group>"; };
@@ -181,6 +183,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0004 /* AudioCapture.swift */,
+				AA0430 /* RecordingLimits.swift */,
 				AA0006 /* HotkeyManager.swift */,
 				AA0008 /* TextInserter.swift */,
 			);
@@ -324,6 +327,7 @@
 				AA0001 /* ChillTalkApp.swift in Sources */,
 				AA0003 /* AppState.swift in Sources */,
 				AA0005 /* AudioCapture.swift in Sources */,
+				AA0431 /* RecordingLimits.swift in Sources */,
 				AA0007 /* HotkeyManager.swift in Sources */,
 				AA0009 /* TextInserter.swift in Sources */,
 				AA0011 /* ASRProvider.swift in Sources */,
