@@ -45,6 +45,8 @@
 		AA03C1 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA03C0 /* Localizable.xcstrings */; };
 		AA03C3 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = AA03C2 /* InfoPlist.xcstrings */; };
 		AA0401 /* AssemblyAIASR.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0400 /* AssemblyAIASR.swift */; };
+		AA0421 /* AppUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0420 /* AppUpdater.swift */; };
+		AA0422 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = AA0423 /* Sparkle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -88,6 +90,7 @@
 		AAFF00 /* ChillTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChillTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAFF01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0400 /* AssemblyAIASR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssemblyAIASR.swift; sourceTree = "<group>"; };
+		AA0420 /* AppUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdater.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +98,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA0422 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,6 +203,7 @@
 			children = (
 				AA0018 /* PermissionManager.swift */,
 				AA0020 /* SettingsManager.swift */,
+				AA0420 /* AppUpdater.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -251,6 +256,9 @@
 			dependencies = (
 			);
 			name = ChillTalk;
+			packageProductDependencies = (
+				AA0423 /* Sparkle */,
+			);
 			productName = ChillTalk;
 			productReference = AAFF00 /* ChillTalk.app */;
 			productType = "com.apple.product-type.application";
@@ -283,6 +291,9 @@
 				Base,
 			);
 			mainGroup = AAFF20;
+			packageReferences = (
+				AA0424 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			productRefGroup = AAFF22 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -321,6 +332,7 @@
 				AA0017 /* OpenRouterPolish.swift in Sources */,
 				AA0019 /* PermissionManager.swift in Sources */,
 				AA0021 /* SettingsManager.swift in Sources */,
+				AA0421 /* AppUpdater.swift in Sources */,
 				AA0025 /* RecordingHUD.swift in Sources */,
 				AA0027 /* OpenRouterASR.swift in Sources */,
 				AA0031 /* OpenAIWhisperASR.swift in Sources */,
@@ -547,6 +559,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA0424 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = exactVersion;
+				version = 2.10.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA0423 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0424 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AAFF60 /* Project object */;
 }

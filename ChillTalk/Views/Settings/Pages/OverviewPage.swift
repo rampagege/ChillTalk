@@ -10,6 +10,7 @@ struct OverviewPage: View {
     @State private var needsRestart = false
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var loginItemNote: String?
+    @ObservedObject private var updater = AppUpdater.shared
 
     var body: some View {
         SettingsPageView(title: String(localized: "概览"), subtitle: String(localized: "按一下快捷键开始说话，再按一下结束，文字会出现在光标处。")) {
@@ -77,6 +78,18 @@ struct OverviewPage: View {
                         .labelsHidden()
                         .toggleStyle(.switch)
                         .onChange(of: launchAtLogin) { setLaunchAtLogin(launchAtLogin) }
+                }
+                CardDivider()
+                CardRow(label: String(localized: "自动检查更新"),
+                        detail: String(localized: "每天从 GitHub 检查一次新版本")) {
+                    HStack(spacing: 8) {
+                        Button(String(localized: "检查更新")) { updater.checkForUpdates() }
+                            .buttonStyle(BrandButtonStyle(prominent: false))
+                            .disabled(!updater.canCheckForUpdates)
+                        Toggle("", isOn: $updater.automaticallyChecks)
+                            .labelsHidden()
+                            .toggleStyle(.switch)
+                    }
                 }
                 CardDivider()
                 CardRow(label: String(localized: "界面语言"),

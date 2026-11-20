@@ -5,18 +5,35 @@ import SwiftUI
 /// menu bar tints it for light/dark mode automatically.
 enum MenuBarIcon {
     private static let size = NSSize(width: 18, height: 18)
-    private static var cache: [RecordingState: NSImage] = [:]
+    private struct Key: Hashable {
+        let state: RecordingState
+        let updateWaiting: Bool
+    }
+    private static var cache: [Key: NSImage] = [:]
 
-    static func image(for state: RecordingState) -> NSImage {
-        if let cached = cache[state] { return cached }
+    /// `updateWaiting` adds a dot at the top right.
+    static func image(for state: RecordingState, updateWaiting: Bool = false) -> NSImage {
+        let key = Key(state: state, updateWaiting: updateWaiting)
+        if let cached = cache[key] { return cached }
         let image = NSImage(size: size, flipped: false) { _ in
             draw(state)
+            if updateWaiting { drawDot() }
             return true
         }
         image.isTemplate = true
         image.accessibilityDescription = "ChillTalk \(state.displayName)"
-        cache[state] = image
+            + (updateWaiting ? " · " + String(localized: "有新版本") : "")
+        cache[key] = image
         return image
+    }
+
+    private static func drawDot() {
+        let dot = NSRect(x: 12, y: 12, width: 6, height: 6)
+        // Cut a gap around the dot so it reads as separate from the circle.
+        NSGraphicsContext.current?.compositingOperation = .destinationOut
+        NSBezierPath(ovalIn: dot.insetBy(dx: -1.5, dy: -1.5)).fill()
+        NSGraphicsContext.current?.compositingOperation = .sourceOver
+        NSBezierPath(ovalIn: dot).fill()
     }
 
     private static func draw(_ state: RecordingState) {

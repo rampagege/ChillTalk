@@ -34,6 +34,8 @@ Download the latest `.dmg` from [Releases](https://github.com/rampagege/ChillTal
 
 This build is not notarized: on first launch, go to System Settings → Privacy & Security and click **Open Anyway**.
 
+ChillTalk tells you when a new version is out and updates itself (menu bar → Check for Updates…). Versions 0.1.3 and earlier don't have this yet: download the next version once by hand.
+
 ## Usage
 
 1. Grant **Microphone** and **Accessibility** permissions

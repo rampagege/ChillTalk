@@ -10,7 +10,8 @@ struct ChillTalkApp: App {
             MenuBarExtraContent()
                 .environmentObject(appDelegate.appState)
         } label: {
-            Image(nsImage: MenuBarIcon.image(for: appDelegate.appState.recordingState))
+            Image(nsImage: MenuBarIcon.image(for: appDelegate.appState.recordingState,
+                                             updateWaiting: AppUpdater.shared.pendingVersion != nil))
         }
     }
 }
@@ -18,9 +19,17 @@ struct ChillTalkApp: App {
 struct MenuBarExtraContent: View {
     @EnvironmentObject var appState: AppState
     @AppStorage("hotkeyPreset") private var hotkeyPresetRaw = HotkeyPreset.defaultPreset.rawValue
+    @ObservedObject private var updater = AppUpdater.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            if let version = updater.pendingVersion {
+                Button("更新到 \(version)...") {
+                    updater.checkForUpdates()
+                }
+                Divider()
+            }
+
             Text("状态: \(appState.recordingState.displayName)")
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
@@ -51,6 +60,11 @@ struct MenuBarExtraContent: View {
             Button("权限...") {
                 SettingsWindowController.shared.show(page: .permissions)
             }
+
+            Button("检查更新...") {
+                updater.checkForUpdates()
+            }
+            .disabled(!updater.canCheckForUpdates)
 
             Divider()
 
@@ -111,6 +125,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, ObservableObject {
         appState.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
+        // Starts the updater; the icon shows a dot while an update waits.
+        MainActor.assumeIsolated {
+            AppUpdater.shared.objectWillChange
+                .sink { [weak self] _ in self?.objectWillChange.send() }
+                .store(in: &cancellables)
+        }
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
